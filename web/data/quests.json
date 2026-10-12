@@ -1,0 +1,685 @@
+{
+  "version": 1,
+  "checked": "2026-10-11",
+  "quests": [
+    {
+      "id": "eileen",
+      "title": "烏鴉獵人艾琳",
+      "en": "Eileen the Crow",
+      "entities": [
+        2410900,
+        2400900,
+        2400902,
+        2400903
+      ],
+      "warning": "首次進入禁忌森林前，先完成亨利克戰及後續交談。保護艾琳，誤傷或死亡會中斷正常路線。",
+      "reward": "烏鴉獵人徽章、獵人誓約符文、姿勢",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "早期可在雅南中部乾船塢高處交談；初見可錯過，教堂階段仍可能接續。",
+          "entity": 2410900,
+          "textEn": "You can meet her early above the dry dock in Central Yharnam. Missing this first encounter may still allow you to continue at Cathedral Ward."
+        },
+        {
+          "text": "打開教堂病房主要鐵門後，到歐頓教堂外交談，聽取亨利克的警告。",
+          "entity": 2400900,
+          "textEn": "Open the main gates in Cathedral Ward, then speak to her outside Oedon Chapel and hear her warning about Henryk."
+        },
+        {
+          "text": "前往加斯科因的戰場「歐頓之墓」，協助擊敗亨利克，再與艾琳交談；必須趕在首次進入禁忌森林之前。",
+          "entity": null,
+          "textEn": "Go to Father Gascoigne’s arena, the Tomb of Oedon. Help defeat Henryk and speak to Eileen again before your first visit to the Forbidden Woods."
+        },
+        {
+          "text": "擊敗羅姆、觸發血月後，回大教堂外找受傷的艾琳；擊敗教堂內的該隱赫斯特血鴉，再回報領取獎勵。其他分支可能在教堂內遇到敵對艾琳。",
+          "entity": 2400903,
+          "textEn": "After defeating Rom and triggering the Blood Moon, find the wounded Eileen outside the Grand Cathedral. Defeat the Bloody Crow of Cainhurst inside, then return for your reward. Other branches can lead to a hostile Eileen inside the cathedral."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/03/raven-hunter.html"
+      ],
+      "warningEn": "Complete the Henryk fight and speak to Eileen afterward before entering the Forbidden Woods for the first time. Keep her alive; attacking her or letting her die interrupts the usual route.",
+      "rewardEn": "Crow Hunter Badge, Hunter oath rune, gestures"
+    },
+    {
+      "id": "alfred",
+      "title": "阿爾弗雷德與處刑隊",
+      "en": "Alfred",
+      "entities": [
+        2400760,
+        2400763,
+        2500790
+      ],
+      "warning": "不要提前殺死阿爾弗雷德；交出未拆封邀請函會使女王遭到襲擊。",
+      "reward": "車輪獵人徽章、光輝誓約符文、姿勢",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "在教堂病房通往舊雅南的路上交談並同意合作。",
+          "entity": 2400760,
+          "textEn": "Speak to Alfred on the route from Cathedral Ward to Old Yharnam and agree to cooperate."
+        },
+        {
+          "text": "探索該隱赫斯特，擊敗洛格力斯、戴上幻視王冠，進入女王房間並拾取未拆封邀請函。",
+          "entity": 2500600,
+          "textEn": "Explore Cainhurst, defeat Logarius and wear the Crown of Illusions to enter the queen’s chamber. Pick up the Unopened Summons."
+        },
+        {
+          "text": "夜晚到禁忌森林入口附近，把未拆封邀請函交給阿爾弗雷德。",
+          "entity": 2400763,
+          "textEn": "At night, find Alfred near the entrance to the Forbidden Woods and give him the Unopened Summons."
+        },
+        {
+          "text": "重新載入後到女王房間交談；可拾取女王的血肉供日後復活女王。",
+          "entity": 2500790,
+          "textEn": "Reload and visit the queen’s chamber to speak to him. Collect Queenly Flesh if you want to revive the queen later."
+        },
+        {
+          "text": "返回最初相遇處，在其遺體取得光輝符文。",
+          "entity": 2400760,
+          "textEn": "Return to where you first met Alfred and collect the Radiance rune from his body."
+        }
+      ],
+      "sources": [
+        "https://bloodborne.wikidot.com/alfred"
+      ],
+      "warningEn": "Keep Alfred alive until his quest is complete. Giving him the Unopened Summons leads to an attack on the queen.",
+      "rewardEn": "Wheel Hunter Badge, Radiance oath rune, gestures"
+    },
+    {
+      "id": "annalise",
+      "title": "女王安娜莉絲與污穢血族",
+      "en": "Annalise",
+      "entities": [
+        2500600
+      ],
+      "warning": "需在女王前跪下交談；女王遇襲後仍可用血肉復活。",
+      "reward": "污穢誓約符文、該隱赫斯特徽章",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "擊敗洛格力斯，戴上幻視王冠靠近王座後方，進入女王房間。",
+          "entity": 2500600,
+          "textEn": "Defeat Logarius, wear the Crown of Illusions and approach the back of the throne to reveal the queen’s chamber."
+        },
+        {
+          "text": "跪下並加入血族；裝備污穢符文後可收集血污，回來獻給女王。",
+          "entity": 2500600,
+          "textEn": "Kneel and join the Vilebloods. Equip Corruption to collect Blood Dregs and bring them to the queen."
+        },
+        {
+          "text": "如女王被殺，拾取女王的血肉；擊敗宇宙之女後，到絕望祭壇獻上血肉，再回王座交談。祭壇步驟沒有新增猜測座標。",
+          "entity": null,
+          "textEn": "If she is killed, collect Queenly Flesh. After defeating Ebrietas, offer it at the Altar of Despair, then return to the throne. The altar step has no speculative map marker."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/03/annalise-queen-of-castle-cainhurst.html",
+        "https://www.bloodborne-wiki.com/2015/03/altar-of-despair.html"
+      ],
+      "warningEn": "Kneel before the queen to speak to her. If she is attacked, Queenly Flesh can still revive her.",
+      "rewardEn": "Corruption oath rune, Cainhurst Badge"
+    },
+    {
+      "id": "arianna",
+      "title": "亞莉安娜與臍帶",
+      "en": "Arianna",
+      "entities": [
+        2400752,
+        2400750,
+        2410770
+      ],
+      "warning": "血月前完成避難。阿黛拉在教堂時，反覆接受亞莉安娜的血（達三次）可能導致她遭殺害；不要送往診所。",
+      "reward": "特殊血液、姿勢；後期分支可取得三分之一臍帶",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "擊敗渴血獸、漢威克女巫或阿梅莉亞其中之一後，再到教堂病房小巷敲門；告知歐頓教堂。",
+          "entity": 2400752,
+          "textEn": "After defeating the Blood-starved Beast, the Witch of Hemwick or Vicar Amelia, knock at her door in the Cathedral Ward alley and tell her about Oedon Chapel."
+        },
+        {
+          "text": "回歐頓教堂交談。保護她免受乞丐和阿黛拉事件影響。",
+          "entity": 2400750,
+          "textEn": "Speak to her at Oedon Chapel. Protect her from the beggar and Adella’s blood-related event."
+        },
+        {
+          "text": "擊敗米科拉什後，沿教堂下方通道找到她與新生兒；擊殺新生兒可取臍帶，亦會結束她的生命。",
+          "entity": 2410770,
+          "textEn": "After defeating Micolash, follow the passage below the chapel to find her and her newborn. Killing the newborn yields the cord and also ends her life."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/03/arianna-woman-of-pleasure.html"
+      ],
+      "warningEn": "Arrange refuge before the Blood Moon. Accepting Arianna’s blood repeatedly (three times) while Adella is in the chapel can lead to her murder. Do not send her to the clinic.",
+      "rewardEn": "Special blood, gesture; a later branch yields One Third of Umbilical Cord"
+    },
+    {
+      "id": "adella",
+      "title": "修女阿黛拉",
+      "en": "Adella",
+      "entities": [
+        2800670,
+        2400770
+      ],
+      "warning": "務必在血月前救援；穿治癒教會上衣交談。與亞莉安娜的供血事件有衝突。",
+      "reward": "特殊血液、教會行禮姿勢",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "被布袋人帶到地下監獄後，穿黑色教會服等教會上衣，在樓下找阿黛拉。",
+          "entity": 2800670,
+          "textEn": "After a Snatcher takes you to Hypogean Gaol, wear Church chest attire such as the Black Church Garb and find Adella downstairs."
+        },
+        {
+          "text": "告知歐頓教堂，回教堂繼續交談並取得姿勢與供血。不要把她送到冒牌醫生處。",
+          "entity": 2400770,
+          "textEn": "Send her to Oedon Chapel, then speak to her there for her gesture and blood. Do not send her to the impostor’s clinic."
+        },
+        {
+          "text": "若想保住亞莉安娜，避免在阿黛拉在場時反覆接受亞莉安娜的血。",
+          "entity": 2400770,
+          "textEn": "To protect Arianna, avoid repeatedly accepting Arianna’s blood while Adella is present."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/03/gestures.html",
+        "https://www.bloodborne-wiki.com/2015/03/oedon-writhe.html",
+        "https://www.bloodborne-wiki.com/2015/03/arianna-woman-of-pleasure.html"
+      ],
+      "warningEn": "Rescue her before the Blood Moon and wear Healing Church chest attire when speaking to her. Her blood-related event conflicts with Arianna’s.",
+      "rewardEn": "Special blood, Church Bow gesture"
+    },
+    {
+      "id": "iosefka",
+      "title": "尤瑟夫卡診所的變化",
+      "en": "Iosefka / Impostor",
+      "entities": [
+        2410700,
+        2410710,
+        2410711
+      ],
+      "warning": "進入教堂病房後醫生已被冒充。送去的避難者會遭實驗；冒牌醫生的血月前後獎勵互斥。",
+      "reward": "尤瑟夫卡的血瓶；冒牌醫生：蠕動歐頓或三分之一臍帶",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "開局返回診療室門口，可向真正的醫生索取血瓶。",
+          "entity": 2410700,
+          "textEn": "At the beginning, return to the door of the sickroom to request a blood vial from the real doctor."
+        },
+        {
+          "text": "進入教堂病房後，再訪診所會接到收容居民的邀請；這是冒牌醫生。",
+          "entity": 2410710,
+          "textEn": "After entering Cathedral Ward, revisit the clinic to hear an invitation to send residents there. This is the impostor."
+        },
+        {
+          "text": "從禁忌森林山洞、毒池和長梯繞到診所後門。血月前闖入上層可能敵對；此時殺她取得符文，會失去其臍帶。",
+          "entity": 2410710,
+          "textEn": "Reach the back entrance through the Forbidden Woods cave, poison pool and long ladder. Entering the upper floor before the Blood Moon can make her hostile. Killing her then yields a rune and forfeits her cord."
+        },
+        {
+          "text": "若要臍帶，讓她活到羅姆之後，血月時返回上層處理她。",
+          "entity": 2410711,
+          "textEn": "For the cord, keep her alive until after Rom and return to the upper floor during the Blood Moon."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/07/impostor-iosefka.html"
+      ],
+      "warningEn": "Iosefka is replaced after you enter Cathedral Ward. Refugees sent to the clinic are experimented on. The impostor’s rewards before and after the Blood Moon are mutually exclusive.",
+      "rewardEn": "Iosefka’s Blood Vial; impostor: Oedon Writhe or One Third of Umbilical Cord"
+    },
+    {
+      "id": "girl",
+      "title": "小女孩與姊姊",
+      "en": "Young Girl / Older Sister",
+      "entities": [
+        2410760
+      ],
+      "warning": "沒有可確認的圓滿救援結局。音樂盒需在入夜前取得；臨近血月再接任務可能已來不及。",
+      "reward": "小音樂盒、紅色／白色信使緞帶",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "在下水道梯子通往廣場的窗前答應找母親，先領小音樂盒。",
+          "entity": 2410760,
+          "textEn": "At the window reached from the sewer ladder to the square, agree to find her mother and obtain the Tiny Music Box first."
+        },
+        {
+          "text": "擊敗加斯科因後找到紅寶石胸針。交還胸針，或保留並告知教堂，均會走向悲劇；送診所會成為實驗品。",
+          "entity": 2410760,
+          "textEn": "After defeating Gascoigne, find the Red Jeweled Brooch. Returning it, or keeping it and recommending the chapel, leads to tragedy. Sending her to the clinic makes her an experiment."
+        },
+        {
+          "text": "她離開前往教堂後，重新載入，擊敗下水道野豬取得紅緞帶。",
+          "entity": null,
+          "textEn": "After she leaves for the chapel, reload and defeat the sewer pig to obtain the Red Messenger Ribbon."
+        },
+        {
+          "text": "血月後回同一窗口找姊姊，交紅緞帶，重新載入並到附近梯子底下找白緞帶。",
+          "entity": 2410760,
+          "textEn": "After the Blood Moon, meet her older sister at the same window. Give her the red ribbon, reload and look for the white ribbon at the foot of the nearby ladder."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/07/young-girl-and-older-sister.html"
+      ],
+      "warningEn": "There is no confirmed happy rescue ending. Obtain the music box before nightfall; starting the quest near the Blood Moon may be too late.",
+      "rewardEn": "Tiny Music Box, Red / White Messenger Ribbon"
+    },
+    {
+      "id": "gilbert",
+      "title": "吉爾伯特的贈禮",
+      "en": "Gilbert",
+      "entities": [
+        2410780
+      ],
+      "warning": "血月前領取贈禮；之後窗口角色狀態會改變。",
+      "reward": "火焰噴射器；後期野獸符文",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "與雅南中部燈籠旁窗口的吉爾伯特交談。",
+          "entity": 2410780,
+          "textEn": "Speak to Gilbert at the window beside the Central Yharnam lamp."
+        },
+        {
+          "text": "首次進入歐頓教堂後返回，反覆交談取得火焰噴射器。",
+          "entity": 2410780,
+          "textEn": "After first entering Oedon Chapel, return and exhaust his dialogue to obtain the Flamesprayer."
+        },
+        {
+          "text": "血月後再查看窗口附近的變化；符文掉落位置可配合「符文」篩選查看。",
+          "entity": 2410780,
+          "textEn": "After the Blood Moon, check the changes near his window. Use the Runes filter to find the rune source."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/03/flamesprayer.html",
+        "https://www.bloodborne-wiki.com/2015/03/beast.html"
+      ],
+      "warningEn": "Collect his gift before the Blood Moon; afterward his condition changes.",
+      "rewardEn": "Flamesprayer; later, a Beast rune"
+    },
+    {
+      "id": "old-woman",
+      "title": "孤獨老婦人的避難",
+      "en": "Lonely Old Woman",
+      "entities": [
+        2410730,
+        2400730
+      ],
+      "warning": "多次索取鎮靜劑會讓她外出；後續外出可能死亡。",
+      "reward": "鎮靜劑",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "得知歐頓教堂安全後，返回乾船塢附近有犬籠的住家，告知教堂。",
+          "entity": 2410730,
+          "textEn": "After learning that Oedon Chapel is safe, return to the house near the dry dock and dog cages and tell her about the chapel."
+        },
+        {
+          "text": "回教堂交談；夜色推進後，她會提供鎮靜劑。",
+          "entity": 2400730,
+          "textEn": "Speak to her at the chapel. As the night advances, she begins to offer sedatives."
+        },
+        {
+          "text": "持續索取會使她出門尋藥，第二次外出會死於教堂外。若想保住她，停止索取。",
+          "entity": 2400730,
+          "textEn": "Repeated requests send her out to find medicine. On her second trip she dies outside the chapel. Stop requesting more to keep her alive."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/03/old-woman.html"
+      ],
+      "warningEn": "Repeated requests for sedatives make her leave to find more. A later trip can kill her.",
+      "rewardEn": "Sedatives"
+    },
+    {
+      "id": "skeptic",
+      "title": "多疑老人的反向選擇",
+      "en": "Skeptical Man",
+      "entities": [
+        2400766,
+        2400765
+      ],
+      "warning": "他不信任玩家，會去你所推薦的另一個地點。",
+      "reward": "教堂居民對話",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "先為對門的亞莉安娜安排避難，再與老人交談。",
+          "entity": 2400766,
+          "textEn": "Arrange refuge for Arianna across the street, then speak to the man."
+        },
+        {
+          "text": "想讓他到歐頓教堂，需告知尤瑟夫卡診所；先確保兩處避難資訊已知。",
+          "entity": 2400766,
+          "textEn": "To send him to Oedon Chapel, recommend Iosefka’s Clinic. Make sure you know about both refuges first."
+        },
+        {
+          "text": "回教堂確認他抵達；其對其他居民的評價不宜直接當作真相。",
+          "entity": 2400765,
+          "textEn": "Return to the chapel to confirm his arrival. Treat his judgments of other residents with caution."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/03/cathedral-ward.html"
+      ],
+      "warningEn": "He distrusts you and goes to the refuge opposite to the one you recommend.",
+      "rewardEn": "Chapel resident dialogue"
+    },
+    {
+      "id": "beggar",
+      "title": "可疑乞丐的危險",
+      "en": "Suspicious Beggar",
+      "entities": [
+        2700755,
+        2400755
+      ],
+      "warning": "不要把他送到教堂：會殺害避難者。直接攻擊會變成強敵。",
+      "reward": "野獸符文、分支消耗品",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "在禁忌森林風車屋頂找到他，先決定是否介入。",
+          "entity": 2700755,
+          "textEn": "Find him on the windmill roof in the Forbidden Woods and decide whether to intervene."
+        },
+        {
+          "text": "可送到診所，再由後門進診所處理變異後的他；或原地戰鬥。兩條路都可取得野獸符文。",
+          "entity": 2700755,
+          "textEn": "You can send him to the clinic and later use the back entrance to deal with his transformed form, or fight him where you meet him. Either route can yield the Beast rune."
+        },
+        {
+          "text": "若已送教堂，立即留意外側的他和居民安危；擊敗更多 Boss 會使殺人事件推進。",
+          "entity": 2400755,
+          "textEn": "If you sent him to the chapel, check him outside and watch the residents’ safety. Defeating more bosses advances the murders."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/03/blind-man.html"
+      ],
+      "warningEn": "Do not send him to the chapel: he kills refugees. Attacking him directly turns him into a powerful enemy.",
+      "rewardEn": "Beast rune, branch-dependent consumables"
+    },
+    {
+      "id": "chapel",
+      "title": "歐頓教堂的避難者",
+      "en": "Chapel Refugees",
+      "entities": [
+        2400700
+      ],
+      "warning": "可救四位成年居民；女孩不能平安抵達，乞丐會殺人。",
+      "reward": "教堂居民對話與姿勢",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "先與教堂居民交談，開啟歐頓教堂避難選項。",
+          "entity": 2400700,
+          "textEn": "Speak to the Chapel Dweller first to unlock Oedon Chapel as a refuge."
+        },
+        {
+          "text": "血月前安排老婦人、亞莉安娜、阿黛拉與多疑老人前來。老人要推薦相反地點；分別參照其支線。",
+          "entity": 2400700,
+          "textEn": "Before the Blood Moon, bring the old woman, Arianna, Adella and the skeptical man. Recommend the opposite destination to the man; see each character’s guide."
+        },
+        {
+          "text": "每救一位回來交談；保護居民，避免乞丐與供血衝突造成死亡。",
+          "entity": 2400700,
+          "textEn": "Speak to the Chapel Dweller after each rescue. Protect the residents from the beggar and blood-related conflicts."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/03/Oedon-Chapel-Dweller.html"
+      ],
+      "warningEn": "Four adult residents can be rescued. The young girl cannot arrive safely, and the beggar kills residents.",
+      "rewardEn": "Resident dialogue and gestures"
+    },
+    {
+      "id": "djura",
+      "title": "機槍獵人久拉的和解",
+      "en": "Djura",
+      "entities": [
+        2300710
+      ],
+      "warning": "不要先殺久拉。交好後傷害舊雅南野獸可能讓他再次敵對。",
+      "reward": "火藥桶獵人徽章、拂塵姿勢",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "首次通過舊雅南可暫避其機槍，不必上塔殺他。",
+          "entity": 2300710,
+          "textEn": "On your first trip through Old Yharnam, avoid his gunfire; you do not need to climb the tower and kill him."
+        },
+        {
+          "text": "至少遭遇一次黑獸帕爾；之後從黑獸墓地或善良金杯教堂方向繞回高塔，避免被察覺及傷害野獸。",
+          "entity": null,
+          "textEn": "Encounter Darkbeast Paarl at least once. Later, approach the tower from the Graveyard of the Darkbeast or Church of the Good Chalice without being detected or harming beasts."
+        },
+        {
+          "text": "爬上高塔與他交談，選擇放過舊雅南的野獸。",
+          "entity": 2300710,
+          "textEn": "Climb the tower, speak to Djura and agree to spare the beasts of Old Yharnam."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/03/old-hunter-gyula.html"
+      ],
+      "warningEn": "Keep Djura alive. After befriending him, harming Old Yharnam’s beasts can make him hostile again.",
+      "rewardEn": "Powder Keg Hunter Badge, Brush Off Dust gesture"
+    },
+    {
+      "id": "patches",
+      "title": "蜘蛛帕奇",
+      "en": "Patches",
+      "entities": [
+        3200101
+      ],
+      "warning": "先完成對話領符文，再決定如何處置。其他普通蜘蛛不是他。",
+      "reward": "扁桃石、求饒姿勢、逆時針變形符文",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "進入禁忌森林後，可在仍可對話的居民窗口取得扁桃石；前往大教堂右側盡頭，被亞彌達拉帶往教學大樓。窗口無固定單一標記。",
+          "entity": null,
+          "textEn": "After entering the Forbidden Woods, obtain the Tonsil Stone at a resident’s window where dialogue is still available. Go to the end of the route right of the Grand Cathedral and let the Amygdala take you to the Lecture Building. The window has no single fixed marker."
+        },
+        {
+          "text": "先在教學大樓一樓隔門交談；惡夢邊境另有推落陷阱事件。",
+          "entity": 3200101,
+          "textEn": "Speak through the door on the Lecture Building’s first floor. He also has a trap event in the Nightmare Frontier."
+        },
+        {
+          "text": "後期到教學大樓二樓，從梯子進入他的房間，正面交談至結束，取得姿勢和符文。",
+          "entity": 3200101,
+          "textEn": "Later, reach the Lecture Building’s second floor, take the ladder into his room and exhaust his face-to-face dialogue for the gesture and rune."
+        }
+      ],
+      "sources": [
+        "https://bloodborne.wikidot.com/patches-the-spider"
+      ],
+      "warningEn": "Finish his dialogue and collect the rune before deciding what to do with him. Other ordinary spiders are not Patches.",
+      "rewardEn": "Tonsil Stone, Beg for Life gesture, Anti-Clockwise Metamorphosis rune"
+    },
+    {
+      "id": "valtr",
+      "title": "瓦爾特與聯盟",
+      "en": "Valtr",
+      "entities": [
+        2700912
+      ],
+      "warning": "加入聯盟不等於完成支線；需碾碎害蟲後回報。",
+      "reward": "不潔符文、聯盟姿勢／手杖、鐵盔",
+      "dlc": false,
+      "steps": [
+        {
+          "text": "在禁忌森林燈籠旁建築內與瓦爾特交談，加入聯盟並取得不潔符文。",
+          "entity": 2700912,
+          "textEn": "Speak to Valtr inside the building beside the Forbidden Woods lamp. Join the League and receive Impurity."
+        },
+        {
+          "text": "裝備不潔，協助擊敗 Boss 可獲害蟲；DLC 也有離線來源。碾碎一隻後回報。",
+          "entity": 2700912,
+          "textEn": "Equip Impurity and help defeat bosses to earn Vermin; the DLC also has offline sources. Crush one and report back."
+        },
+        {
+          "text": "累計碾碎五隻後交談並重新載入，拾取留下的鐵盔；留意附近馬達拉斯雙胞胎的襲擊。",
+          "entity": 2700912,
+          "textEn": "After crushing five in total, speak to him and reload. Collect the iron helmet he leaves, and watch for an attack by the nearby Madaras Twin."
+        }
+      ],
+      "sources": [
+        "https://bloodborne.fandom.com/wiki/Valtr%2C_Master_of_the_League",
+        "https://www.bloodborne-wiki.com/2015/11/impurity.html"
+      ],
+      "warningEn": "Joining the League does not finish the quest. Crush Vermin and report back.",
+      "rewardEn": "Impurity rune, League gesture / staff, iron helmet"
+    },
+    {
+      "id": "adeline",
+      "title": "阿德琳的三份腦液",
+      "en": "Adeline",
+      "entities": [
+        3500910,
+        3500911
+      ],
+      "warning": "不要在仍坐椅子時殺她。只有最後變成頭部後，依對話攻擊一次取其腦液。",
+      "reward": "陽台鑰匙、乳草誓約符文",
+      "dlc": true,
+      "steps": [
+        {
+          "text": "經升降機捷徑進研究大廳一樓實驗室，接受尋找腦液的請求。",
+          "entity": 3500910,
+          "textEn": "Use the elevator shortcut to reach her laboratory on the Research Hall’s first floor and accept her request for Brain Fluid."
+        },
+        {
+          "text": "攻擊屋頂橫梁或三、四樓間平台的頭部病人，取得第一份腦液交給她。兩份先後順序不限。",
+          "entity": 3500910,
+          "textEn": "Strike a head patient on the roof beams or the platform between floors three and four. Give her the first Brain Fluid; the order of these two sources does not matter."
+        },
+        {
+          "text": "離開研究大廳再返回至少三次，待新請求出現，交第二份腦液取得陽台鑰匙。",
+          "entity": 3500910,
+          "textEn": "Leave and return to the Research Hall at least three times. When her next request appears, give her the second Brain Fluid to receive the Balcony Key."
+        },
+        {
+          "text": "再次離開返回至少三次，找門後變成頭部的她；對話後攻擊一次，等復活，把取得的第三份腦液交還以得乳草。",
+          "entity": 3500911,
+          "textEn": "Leave and return at least three more times. Find her as a head behind the door, speak to her, strike once and wait for her to revive. Return the third Brain Fluid to obtain Milkweed."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/11/blood-saint-adeline.html"
+      ],
+      "warningEn": "Do not kill her while she is still seated. Only after she becomes a head at the final stage should you speak to her and strike once for her Brain Fluid.",
+      "rewardEn": "Balcony Key, Milkweed oath rune"
+    },
+    {
+      "id": "simon",
+      "title": "西蒙追尋惡夢的秘密",
+      "en": "Simon",
+      "entities": [
+        3400902,
+        3400903,
+        3500900,
+        3600905
+      ],
+      "warning": "地下屍堆階段先確保取得聖月光劍；部分對話路線會跳過研究大廳的會面。",
+      "reward": "西蒙的弓刃、地下牢房內室鑰匙",
+      "dlc": true,
+      "steps": [
+        {
+          "text": "開啟獵人惡夢教堂捷徑，在走廊交談並表示對惡夢感興趣。",
+          "entity": 3400902,
+          "textEn": "Open the church shortcut in the Hunter’s Nightmare. Speak to Simon in the corridor and say you are interested in the nightmare."
+        },
+        {
+          "text": "擊敗路德維希後先完成其頭部的月光劍事件。穿教會上衣回答「否」的分支，可重新載入向西蒙領劍，領取前不要繼續推進。",
+          "entity": 3400903,
+          "textEn": "After defeating Ludwig, finish the sword event with his head first. In the branch where you wear Church chest attire and answer “No,” reload and collect the sword from Simon before advancing further."
+        },
+        {
+          "text": "若走上述西蒙送劍分支，他會在研究大廳入口補充對話；其他路線可跳過此會面。",
+          "entity": 3500900,
+          "textEn": "If Simon gives you the sword through that branch, he offers more dialogue at the Research Hall entrance. Other routes can skip this meeting."
+        },
+        {
+          "text": "通過瑪麗亞後，在漁村燈塔小屋與瀕死的西蒙交談，取得弓刃和內室鑰匙。未啟動或已死亡時，鑰匙仍可在小屋附近取得。",
+          "entity": 3600905,
+          "textEn": "After passing Maria, speak to the dying Simon in the Fishing Hamlet’s Lighthouse Hut for the Bowblade and inner chamber key. If his quest was not started or he is already dead, the key is still available near the hut."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/11/simon.html"
+      ],
+      "warningEn": "Secure the Holy Moonlight Sword during the Underground Corpse Pile stage. Some dialogue branches skip his Research Hall meeting.",
+      "rewardEn": "Simon’s Bowblade, Underground Cell Inner Chamber Key"
+    },
+    {
+      "id": "brador",
+      "title": "布拉多與入侵",
+      "en": "Brador",
+      "entities": [
+        3500901
+      ],
+      "warning": "入侵分身和牢房本體不同；本體死亡會停止入侵。",
+      "reward": "布拉多套裝、放血者",
+      "dlc": true,
+      "steps": [
+        {
+          "text": "抵達漁村燈塔小屋，取得地下牢房內室鑰匙。",
+          "entity": 3600905,
+          "textEn": "Reach the Lighthouse Hut in the Fishing Hamlet and obtain the Underground Cell Inner Chamber Key."
+        },
+        {
+          "text": "在漁村各入侵點及牢房通道擊敗其分身，可收集服裝。此處只標本體，未替分身猜測座標。",
+          "entity": null,
+          "textEn": "Defeat his phantoms at invasion points in the hamlet and prison corridor to collect attire. Only his body is marked here; phantom coordinates are not guessed."
+        },
+        {
+          "text": "用鑰匙回地下牢房開啟布拉多內室，擊敗本體可取得放血者並終止入侵。",
+          "entity": 3500901,
+          "textEn": "Use the key to open Brador’s inner cell in the underground prison. Defeat his body to obtain the Bloodletter and end the invasions."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/11/fishing-hamlet.html"
+      ],
+      "warningEn": "His invading phantoms are separate from his body in the cell. Killing his body stops the invasions.",
+      "rewardEn": "Brador’s attire set, Bloodletter"
+    },
+    {
+      "id": "priest",
+      "title": "漁村祭司與詛咒秘法",
+      "en": "Fishing Hamlet Priest",
+      "entities": [
+        3600920
+      ],
+      "warning": "需要裝備乳草符文，僅持有符文不夠。",
+      "reward": "詛咒秘法（Accursed Brew）",
+      "dlc": true,
+      "steps": [
+        {
+          "text": "完成阿德琳的三份腦液支線，取得乳草符文。",
+          "entity": 3500911,
+          "textEn": "Complete Adeline’s three Brain Fluid requests to obtain Milkweed."
+        },
+        {
+          "text": "在夢境裝備乳草，再到漁村入口與祭司交談至結束。",
+          "entity": 3600920,
+          "textEn": "Equip Milkweed in the Hunter’s Dream, then exhaust the priest’s dialogue at the Fishing Hamlet entrance."
+        }
+      ],
+      "sources": [
+        "https://www.bloodborne-wiki.com/2015/12/fishing-hamlet-priest.html"
+      ],
+      "warningEn": "Equip the Milkweed rune; merely carrying it is not enough.",
+      "rewardEn": "Accursed Brew hunter tool"
+    }
+  ]
+}

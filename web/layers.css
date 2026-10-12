@@ -1,0 +1,12 @@
+#layer-controls{position:absolute;right:8px;top:8px;z-index:9;display:flex;gap:3px;align-items:center;background:#101e29ed;border:1px solid #567889;border-radius:6px;padding:5px;max-width:calc(100% - 16px);box-sizing:border-box}
+#layer-controls button{font-size:11px;padding:4px 6px;white-space:nowrap;min-width:26px}
+#layer-controls[hidden]{display:none}
+#layer-select{width:132px;min-width:0;font-size:11px;padding:4px 3px;background:#1b2d39;color:#e1f1f1;border:1px solid #496579;border-radius:3px}
+#layer-connections{position:absolute;right:8px;top:51px;z-index:8;width:260px;max-width:calc(100% - 16px);max-height:240px;overflow:auto;background:#101e29f2;border:1px solid #567889;border-radius:5px;padding:7px;box-sizing:border-box;color:#dce9e9;font-size:11px}
+#layer-connections[hidden]{display:none}#layer-connections p{font-size:10px;line-height:1.5;margin:3px 0 7px;color:#a9bec7}
+.layer-link-row{display:flex;gap:4px;margin:4px 0}.layer-link-row button{font-size:11px;padding:6px 5px;text-align:left;flex:1;min-width:0}.layer-link-row .layer-jump{flex:0 0 46px;text-align:center}.layer-link-row.selected button{border-color:#79ebfa;color:#c0f8ff}
+#layer-link-markers{position:absolute;inset:0;pointer-events:none;z-index:4}.layer-link-marker{position:absolute;left:0;top:0;pointer-events:auto;padding:2px 4px;min-width:22px;min-height:21px;font:bold 11px sans-serif;background:#123b49ef;border:1px solid #77e5f3;color:#c5f8ff;border-radius:5px;box-shadow:0 1px 4px #000}
+.layer-link-marker.selected{background:#276778;border:2px solid #e0ffff;z-index:3}.layer-link-marker[hidden]{display:none}
+#layer-link-detail{position:absolute;left:8px;bottom:8px;right:8px;z-index:10;background:#122936f5;border:1px solid #70cbd9;border-radius:6px;padding:8px 10px;font-size:11px}#layer-link-detail[hidden]{display:none}#layer-link-detail p{margin:5px 0;line-height:1.5;color:#b9d0d7}#layer-link-detail button{font-size:11px;margin-right:5px;padding:5px 8px}
+.mini-map #layer-controls{padding:3px;gap:2px}.mini-map #layer-controls button{padding:4px;font-size:10px}.mini-map #layer-select{width:125px;font-size:10px}.mini-map #layer-connections{top:45px;max-height:180px;width:244px}.mini-map #map-caption{max-width:calc(100% - 325px)}
+@media(max-width:760px){#layer-controls{top:5px}#layer-select{width:120px}#layer-connections{top:45px}}

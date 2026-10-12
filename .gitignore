@@ -1,0 +1,17 @@
+artifacts/
+publish/
+**/bin/
+**/obj/
+web/data/*.mesh
+web/data/maps.json
+web/data/layers.json
+tools/lib/
+**/__pycache__/
+*.pyc
+settings.json
+bloodborne.ico
+.vs/
+*.user
+*.zip
+work/
+outputs/

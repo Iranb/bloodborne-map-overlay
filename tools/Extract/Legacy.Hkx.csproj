@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>SoulsFormats.Modern</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseSystemDrawing>true</UseSystemDrawing>
+    <LegacySourceRoot Condition="'$(LegacySourceRoot)'==''">../../artifacts/dependencies/legacy/SoulsFormats/SoulsFormats</LegacySourceRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(LegacySourceRoot)/**/*.cs" Exclude="$(LegacySourceRoot)/bin/**;$(LegacySourceRoot)/obj/**;$(LegacySourceRoot)/Properties/AssemblyInfo.cs" />
+  </ItemGroup>
+</Project>
