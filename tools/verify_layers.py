@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 from playwright.sync_api import sync_playwright
 from build_layers import build
+from verify_auto_layers import verify_auto_layers
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=Path(sys.argv[1]) if len(sys.argv)>1 else ROOT/'artifacts/layers'
@@ -43,7 +44,7 @@ threading.Thread(target=server.serve_forever,daemon=True).start()
 errors=[];requests=[];results=[]
 try:
  with sync_playwright() as p:
-  browser=p.chromium.launch(channel='msedge',headless=True)
+  browser=p.chromium.launch(channel='msedge',headless=True,args=['--use-angle=swiftshader'])
   page=browser.new_page(viewport={'width':620,'height':460})
   page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda r:requests.append(r.url))
   page.goto(f'http://127.0.0.1:{server.server_port}/?compact=1')
@@ -94,16 +95,7 @@ try:
   assert start['target']==end['target'] and start['index']!=end['index']
   page.wait_for_timeout(3000);page.screenshot(path=str(OUT/'layers-compact.png'))
   assert page.evaluate('JSON.stringify(saved.profiles)')==before
-  # Manual browsing remains pinned even when the player changes altitude.
-  index=page.evaluate('layerState.index')
-  sample={'position':{'pid':1,'name':'layer-test','mapId':'m24_01_00_00','level':10,'p':[-150,-70,10],'yaw':0,'cameraYaw':0}}
-  page.evaluate('(s)=>receivePosition(s)',sample)
-  assert page.evaluate('layerState.index')==index
-  page.locator('#layer-player').click();assert page.evaluate('follow&&!layerState.pinned')
-  assert page.locator('#mini-follow').get_attribute('aria-pressed')=='true'
-  index=page.evaluate('layerState.index');sample['position']['p'][1]+=16
-  page.evaluate('(s)=>receivePosition(s)',sample)
-  assert page.evaluate('layerState.index')!=index
+  auto_checks=verify_auto_layers(page)
   # Browser keyboard and native host commands use the same function.
   page.locator('#layer-player').click();page.locator('body').click(position={'x':10,'y':10})
   index=page.evaluate('layerState.index');page.keyboard.press('ArrowUp');assert page.evaluate('layerState.index')==index+1
@@ -115,12 +107,12 @@ try:
   page.locator('.layer-link-row:has(.layer-jump)').first.locator('button').first.click()
   page.set_viewport_size({'width':1180,'height':800});page.wait_for_timeout(300)
   page.screenshot(path=str(OUT/'layers-full.png'))
-  assert page.locator('#layer-player').inner_text()=='Player'
+  assert page.locator('#layer-player').inner_text()=='Auto layer'
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
   assert sum(u.endswith('/layers.json') for u in requests)==1
   assert not errors,errors
   browser.close()
 finally:server.shutdown()
-report={'maps':len(results),'originalLayers':sum(x['sourceFloorCount'] for x in results),'contentLayers':sum(x['floorCount'] for x in results),'onlyNpcAndItemLayers':'passed','emptyRoadsRemainContinuous':'passed','collectedAndCategoryFiltersPreserved':'passed','roadCrossingsEvidenced':evidence,'eventsWithUnknownDestination':sum(l['to'] is None for a in dataset['maps'].values() for l in a['links']),'fixtures':'passed','boundsAndClipping':'passed','pinAndPlayerFollow':'passed','crossingJumpAndProgress':'passed','compactAndFull':'passed','singleDataFetch':True,'errors':errors}
+report={'maps':len(results),'originalLayers':sum(x['sourceFloorCount'] for x in results),'contentLayers':sum(x['floorCount'] for x in results),'onlyNpcAndItemLayers':'passed','emptyRoadsRemainContinuous':'passed','collectedAndCategoryFiltersPreserved':'passed','roadCrossingsEvidenced':evidence,'eventsWithUnknownDestination':sum(l['to'] is None for a in dataset['maps'].values() for l in a['links']),'fixtures':'passed','boundsAndClipping':'passed','automaticPlayerLayer':auto_checks,'crossingJumpAndProgress':'passed','compactAndFull':'passed','singleDataFetch':True,'errors':errors}
 (OUT/'verification.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),'utf-8')
 print(json.dumps(report,ensure_ascii=False),flush=True)

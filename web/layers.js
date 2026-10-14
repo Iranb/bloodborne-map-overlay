@@ -3,7 +3,8 @@
 (()=>{
  const css=document.createElement('link');css.rel='stylesheet';css.href='layers.css';document.head.append(css);
  let catalog=null,area=null,index=null,pinned=false,chosen=null,linksOpen=false,nodes=[];
- let generation=0,ready=false,drawnChosen=undefined;
+ let generation=0,ready=false,drawnChosen=undefined,playerIndex=null;
+ const layerMargin=.45;
  const controls=document.createElement('div');controls.id='layer-controls';controls.hidden=true;
  controls.innerHTML='<button id="layer-down">▼</button><select id="layer-select" aria-label="瀏覽樓層"></select><button id="layer-up">▲</button><button id="layer-player"></button><button id="layer-links"></button>';
  const list=document.createElement('div');list.id='layer-connections';list.hidden=true;
@@ -28,19 +29,23 @@
  const floor=()=>index===null?null:area?.floors[index];
  const at=y=>{if(!area)return 0;const i=area.floors.findIndex(f=>y<f.high);return i<0?area.floors.length-1:i;};
  const contains=y=>!floor()||(y>=floor().low&&y<floor().high);
+ const playerY=()=>live?.mapId===map?.id&&Number.isFinite(live?.p?.[1])?live.p[1]:null;
+ // Track the player's floor separately from a manually browsed floor. Keep the
+ // last floor within a small boundary margin so steps and ramps do not flicker.
+ function trackPlayer(){const y=playerY();if(y===null||!area?.floors.length)return null;const previous=area.floors[playerIndex];return previous&&y>=previous.low-layerMargin&&y<previous.high+layerMargin?playerIndex:at(y);}
  window.layerContains=contains;
  const title=i=>`L${i+1}`;
  const name=link=>{if(link.kind==='road')return tr('道路連接','Road crossing')+' '+title(link.from)+' ↔ '+title(link.to);const marker=map.markers.find(m=>m.id===link.marker);return marker?label(marker):link.id;};
  const symbol=link=>link.kind==='road'?(index===link.to?'↓':'↑'):link.kind==='ladder'?tr('梯','L'):link.kind==='mechanism'?tr('機','M'):tr('門','D');
- function snapshot(){window.layerState={ready,mapId:map?.id,index,pinned,floor:floor(),floorCount:area?.floors.length||0,sourceFloorCount:area?.sourceFloorCount||0,contentFloors:area?.contentFloors||[],connectionCount:area?.links.length||0,selectedLink:chosen};}
+ function snapshot(){window.layerState={ready,mapId:map?.id,index,pinned,playerIndex,floor:floor(),floorCount:area?.floors.length||0,sourceFloorCount:area?.sourceFloorCount||0,contentFloors:area?.contentFloors||[],connectionCount:area?.links.length||0,selectedLink:chosen};}
  function apply(){material.uniforms.floorBottom.value=floor()?.low??-1e6;material.uniforms.floorTop.value=floor()?.high??1e6;snapshot();}
  function relevant(){return area?.links.filter(l=>index===null?l.kind!=='road':l.from===index||l.to===index)||[];}
- function choose(next,manual=true){if(!area)return;index=next===null||!area.floors.length?null:Math.max(0,Math.min(area.floors.length-1,next));pinned=manual;chosen=null;detail.hidden=true;if(index!==null&&manual&&cut){cut=false;$('slice-control').hidden=true;mapAttribute($('slice'),'aria-pressed',false);applySlice();}apply();ui();buildLinks();invalidate();}
- function browse(next){choose(next);if(!floor())return;follow=false;viewFollow=false;toggleUI();syncMini();const candidates=relevant().filter(l=>l.kind==='road').sort((a,b)=>Math.hypot(a.p[0]-target.x,a.p[2]-target.z)-Math.hypot(b.p[0]-target.x,b.p[2]-target.z));const point=candidates[0]?.p??floor().focus;if(point&&Math.hypot(point[0]-target.x,point[2]-target.z)>distance*.6){target.x=point[0];target.z=point[2];}target.y=(floor().low+floor().high)/2;invalidate();}
+ function choose(next,manual=true){if(!area)return;if(manual)playerIndex=trackPlayer();index=next===null||!area.floors.length?null:Math.max(0,Math.min(area.floors.length-1,next));pinned=manual;chosen=null;detail.hidden=true;if(index!==null&&manual&&cut){cut=false;$('slice-control').hidden=true;mapAttribute($('slice'),'aria-pressed',false);applySlice();}apply();ui();buildLinks();invalidate();}
+ function browse(next){choose(next);follow=false;viewFollow=false;toggleUI();syncMini();if(!floor())return;const candidates=relevant().filter(l=>l.kind==='road').sort((a,b)=>Math.hypot(a.p[0]-target.x,a.p[2]-target.z)-Math.hypot(b.p[0]-target.x,b.p[2]-target.z));const point=candidates[0]?.p??floor().focus;if(point&&Math.hypot(point[0]-target.x,point[2]-target.z)>distance*.6){target.x=point[0];target.z=point[2];}target.y=(floor().low+floor().high)/2;invalidate();}
  function step(delta){if(!area?.floors.length||document.querySelector('dialog[open]'))return;const base=index??at(live?.mapId===map.id?live.p[1]:target.y);const next=Math.max(0,Math.min(area.floors.length-1,base+delta));if(next===base){notify(tr(delta>0?'已到最高層':'已到最低層',delta>0?'Highest layer':'Lowest layer'));return;}browse(next);}
  window.stepMapLayer=step;
  window.selectMapLayer=(next)=>choose(next);
- window.followPlayerLayer=function(){follow=true;viewFollow=true;toggleUI();syncMini();choose(at(live?.mapId===map.id?live.p[1]:target.y),false);};
+ window.followPlayerLayer=function(){const next=trackPlayer();if(next!==null)playerIndex=next;choose(next??at(target.y),false);follow=true;viewFollow=true;distance=miniMap?38:55;toggleUI();syncMini();invalidate();};
  window.restoreMapLayer=s=>{if(s&&area)choose(s.index,s.pinned);};
  function ui(){
   controls.hidden=!ready||!area?.floors.length;if(!area)return;
@@ -49,7 +54,8 @@
   select.value=index===null?'all':String(index);select.title=tr('只列含 NPC 或物品的層；空層道路併入相鄰層。非官方樓層編號。','Only layers with NPCs or items; empty roads join nearby layers. Not official floor numbers.');
   $('layer-down').disabled=index===0;$('layer-up').disabled=index===area.floors.length-1;
   $('layer-down').title=tr('下層 · 手柄方向鍵下','Lower layer · D-pad down');$('layer-up').title=tr('上層 · 手柄方向鍵上','Upper layer · D-pad up');
-  mapText($('layer-player'),tr('人物層','Player'));mapAttribute($('layer-player'),'aria-pressed',!pinned&&index!==null);
+  mapText($('layer-player'),tr('自動樓層','Auto layer'));mapAttribute($('layer-player'),'aria-pressed',!pinned&&index!==null);
+  $('layer-player').title=tr('跟隨人物所在層；手動瀏覽在人物換層後自動恢復','Follow the player’s layer; manual browsing ends when the player changes layer');
   mapText($('layer-links'),tr('連接','Links'));mapAttribute($('layer-links'),'aria-pressed',linksOpen);
   list.hidden=!linksOpen;
  }
@@ -82,23 +88,30 @@
   if(changed){for(const row of list.querySelectorAll('.layer-link-row'))row.classList.toggle('selected',row.dataset.id===chosen);drawnChosen=chosen;}
  }
  async function load(){
-  const token=++generation;ready=false;area=null;index=null;controls.hidden=true;list.hidden=true;detail.hidden=true;marks.replaceChildren();nodes=[];apply();
+  const token=++generation;ready=false;area=null;index=null;playerIndex=null;controls.hidden=true;list.hidden=true;detail.hidden=true;marks.replaceChildren();nodes=[];apply();
   await dataPromise;if(token!==generation||!map||!catalog)return;
-  area=catalog[map.id]?contentLayers(catalog[map.id]):null;ready=!!area;if(!area)return;const anchor=live?.mapId===map.id?live.p:(map.markers.find(m=>m.kind==='lamp'&&m.p)?.p??null);index=area.floors.length?at(anchor?.[1]??target.y):null;pinned=false;chosen=null;
+  area=catalog[map.id]?contentLayers(catalog[map.id]):null;ready=!!area;if(!area)return;const anchor=live?.mapId===map.id?live.p:(map.markers.find(m=>m.kind==='lamp'&&m.p)?.p??null);index=area.floors.length?at(anchor?.[1]??target.y):null;playerIndex=trackPlayer();pinned=false;chosen=null;
   // A full-area camera can aim between detached subareas (lecture building / lake).
   // Start a height slice near a known anchor rather than leaving an empty view.
   if(anchor){target.set(...anchor);distance=miniMap?38:55;phi=.4;}
   else if(floor()?.focus){target.set(...floor().focus);distance=miniMap?38:55;phi=.4;}
   apply();ui();buildLinks();invalidate();
  }
- const previousLoad=loadMap;loadMap=async function(id){ready=false;area=null;index=null;nodes=[];controls.hidden=true;list.hidden=true;detail.hidden=true;marks.replaceChildren();apply();const before=loadToken;await previousLoad(id);if(loadToken===before+1)await load();};
- const previousPosition=window.receivePosition;window.receivePosition=async function(p){await previousPosition(p);if(!ready||pinned||index===null||live?.mapId!==map?.id)return;const f=floor(),y=live.p[1];if(y<f.low-.45||y>=f.high+.45)choose(at(y),false);};
+ const previousLoad=loadMap;loadMap=async function(id){generation++;ready=false;area=null;index=null;playerIndex=null;nodes=[];controls.hidden=true;list.hidden=true;detail.hidden=true;marks.replaceChildren();apply();const before=loadToken;await previousLoad(id);if(loadToken===before+1)await load();};
+ const previousPosition=window.receivePosition;window.receivePosition=async function(p){
+  await previousPosition(p);
+  if(!live){playerIndex=null;snapshot();return;}
+  if(!ready||playerY()===null||!area?.floors.length)return;
+  const previous=playerIndex,next=trackPlayer();playerIndex=next;
+  if(pinned){if(previous===null||next!==previous)window.followPlayerLayer();else snapshot();}
+  else if(index!==next)choose(next,false);else snapshot();
+ };
  window.revealMarkerLayer=m=>{if(m?.p&&area&&index!==null&&!contains(m.p[1]))choose(at(m.p[1]));};
  const previousFocus=focusMarker;focusMarker=function(id){const m=map?.markers.find(m=>m.id===id);window.revealMarkerLayer(m);previousFocus(id);};
  const previousRender=render;render=function(){
   // Pinned layers keep horizontal follow while the camera targets that height.
   const actualFollow=follow;if(pinned&&floor()&&follow){follow=false;target.set(live?.mapId===map.id?live.p[0]:target.x,(floor().low+floor().high)/2,live?.mapId===map.id?live.p[2]:target.z);}
-  try{apply();previousRender();if(!contains(live?.p?.[1]??target.y))mapHidden(arrow,true);project();}finally{follow=actualFollow;}
+  try{apply();previousRender();const y=playerY(),inMargin=!pinned&&floor()&&y!==null&&y>=floor().low-layerMargin&&y<floor().high+layerMargin;if(!contains(y??target.y)&&!inMargin)mapHidden(arrow,true);project();}finally{follow=actualFollow;}
  };
  // Route and passage lines use the same height clipping as the terrain.
  const previousDraw=renderer.render.bind(renderer);
@@ -108,12 +121,13 @@
    const old=object.material;object.material=new THREE.ShaderMaterial({uniforms:{floorBottom:material.uniforms.floorBottom,floorTop:material.uniforms.floorTop,color:{type:'c',value:old.color},opacity:{type:'f',value:old.opacity}},vertexShader:'varying float h;void main(){h=position.y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:'varying float h;uniform float floorBottom;uniform float floorTop;uniform vec3 color;uniform float opacity;void main(){if(h<floorBottom||h>=floorTop)discard;gl_FragColor=vec4(color,opacity);}',transparent:true,depthTest:false});old.dispose();clipped.set(object,true);
   }}return previousDraw(...args);
  };
- const previousCommand=window.mapCommand;window.mapCommand=function(cmd){if(cmd==='layer-up')return step(1);if(cmd==='layer-down')return step(-1);return previousCommand(cmd);};
+ const previousCommand=window.mapCommand;window.mapCommand=function(cmd){if(cmd==='layer-up')return step(1);if(cmd==='layer-down')return step(-1);const result=previousCommand(cmd);if(cmd==='follow')window.followPlayerLayer();return result;};
+ const previousFollow=$('follow').onclick;$('follow').onclick=function(...args){if(pinned)return window.followPlayerLayer();previousFollow.apply(this,args);if(follow)window.followPlayerLayer();};
  const previousReset=resetView;resetView=function(){choose(null);previousReset();};$('reset').onclick=resetView;renderer.domElement.ondblclick=resetView;$('mini-overview').onclick=()=>{resetView();syncMini();};
  const previousLocalize=localize;localize=function(){previousLocalize();ui();buildLinks();};
  $('layer-up').onclick=()=>step(1);$('layer-down').onclick=()=>step(-1);$('layer-select').onchange=()=>browse($('layer-select').value==='all'?null:Number($('layer-select').value));
  $('layer-player').onclick=()=>window.followPlayerLayer();$('layer-links').onclick=()=>{linksOpen=!linksOpen;ui();};
  document.addEventListener('keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey||document.querySelector('dialog[open]')||['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();if(!e.repeat)step(e.key==='ArrowUp'?1:-1);}});
- const previousHelp=$('help-button').onclick;$('help-button').onclick=()=>{previousHelp();const note=document.createElement('p');note.textContent=tr('只顯示含 NPC 或物品的層，空層道路併入相鄰層；已持有物品仍計入。並非官方樓層編號。方向鍵上下切層；人物層恢复自動跟隨。連接可定位及切換另一層。bbhost 上方向鍵同時仍會傳給遊戲，請在安全位置瀏覽。','Only layers with NPCs or items are listed, including collected items. Empty roads join nearby layers. These are not official floor numbers. D-pad up/down changes layer; Player restores tracking. Links locate crossings. In bbhost the D-pad also reaches the game; browse in a safe spot.');$('help').insertBefore(note,$('help-close'));};
+ const previousHelp=$('help-button').onclick;$('help-button').onclick=()=>{previousHelp();const note=document.createElement('p');note.textContent=tr('自動切換到人物所在層，樓層邊界有防抖。方向鍵上下可暫時瀏覽別層，人物換層後自動恢復；點「自動樓層」或開啟「跟隨」立即返回。只列含 NPC 或物品的層，已持有物品仍計入，空層道路併入相鄰層。並非官方樓層編號。連接可定位及切換另一層。bbhost 上方向鍵同時仍會傳給遊戲，請在安全位置瀏覽。','Layers follow the player automatically with a small boundary margin. D-pad up/down temporarily browses other layers; tracking resumes when the player changes layer. Auto layer or enabling Follow returns immediately. Only layers with NPCs or items are listed, including collected items. Empty roads join nearby layers. These are not official floor numbers. Links locate crossings. In bbhost the D-pad also reaches the game; browse in a safe spot.');$('help').insertBefore(note,$('help-close'));};
  dataPromise.then(()=>{if(window.mapReady)load();});
 })();

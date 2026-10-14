@@ -8,7 +8,7 @@ A Windows desktop companion for Bloodborne with a compact overlay, read-only pla
 
 - 16 base-game and The Old Hunters areas; orbit, pan, zoom, overhead view and roof cutaway.
 - Only layers containing NPCs or items appear in the selector. Collected items still count; empty road bands merge into adjacent layers. Original geometry and road-crossing anchors are retained.
-- D-pad or keyboard up/down browses layers. **Player** restores automatic layer and position following. **Links** shows crossings and known ladder, door and device anchors.
+- Layers automatically follow the player's height, with a small margin to prevent flicker at boundaries. D-pad or keyboard up/down temporarily browses other layers; tracking resumes when the player changes layer. **Auto layer** or enabling **Follow** returns immediately. **Links** shows crossings and known ladder, door and device anchors.
 - Live position, facing, camera direction, automatic area selection and terrain routes.
 - Filters for lamps, bosses, NPCs, weapons, attire, runes, hunter tools, key items, gems, items and passages.
 - Three manual profiles, JSON import/export and optional autosave inventory/boss observations.
@@ -53,7 +53,7 @@ Preferences and records stay under `%LOCALAPPDATA%\BloodborneMap`. Exports can c
 |---|---|
 | Left drag / right drag / wheel | Orbit / pan / zoom |
 | Up / down, keyboard or D-pad | Change layer |
-| Player / Overview | Resume following / show all layers |
+| Auto layer or enable Follow / Overview | Return to the player's layer / show all layers until the player changes layer |
 | Click marker; Shift-click or Space | Select or route; manually correct progress |
 | Ctrl+Alt or Ctrl+Shift + M / F / L / R | Show-hide / fullscreen-compact / passthrough / restore |
 | Ctrl+Alt or Ctrl+Shift + left / right | Previous / next area |
