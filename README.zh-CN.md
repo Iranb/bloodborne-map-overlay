@@ -12,6 +12,7 @@
 - 实时位置、人物与镜头朝向、自动切图、地形寻路。
 - 灯笼、Boss、NPC、武器、服装、符文、猎人工具、重要道具、宝石、一般物品和通道分类。
 - 三份手动档案、JSON 导入导出、可选的存档物品与 Boss 进度识别。
+- “背包／仓库”显示最新完整存档的数量，包括没有地图坐标的商店和任务奖励。数量随存档更新，历史拾取记录独立保留；离线快照注明角色、存档槽和保存时间，可点“重新读取存档”刷新已配置的目录。
 - 繁体中文及英文界面，包括全部 19 条支线、托盘菜单和提示。点 **EN / 繁中** 切换并记忆选择。
 - 大小窗、置顶、透明度、鼠标穿透与快捷键。
 
@@ -67,6 +68,8 @@ bbhost 无需完整模式即可用方向键切层，但方向键同时仍会传�
 
 游戏进程仅使用查询和读取权限，不注入、不写内存。存档须两次读取一致才接受，地图不写存档。已持有物品可能来自其他来源，开始观察前已消耗的物品需手动修正。NPC 接近只表示到访，不表示完成对话或支线；灯笼及通道需手动确认。
 
+普通点击已完成标记不会取消记录；复选框、Shift 点击、空格和详情按钮才修改手动进度。“清除手动覆盖”恢复单个标记的自动观测记录。背包／仓库数量独立于手动进度和历史持有；拥有消耗品不会勾选所有同名拾取点。符文须在背包或仓库中有实际引用，存档对象表中的残留条目不算持有；空装备槽使用的内部占位道具也已排除。数量以游戏保存为准，尚未保存的背包变化不会立即显示。
+
 静态地形无法确认门、升降机和单向通道的当前状态。不连通时不虚构路线，未知通道的另一端不指定坐标。有少量缺失地形和未定位拾取事件，地图不等于完整成就或全收集攻略。支线含剧透。
 
 ## 验证
@@ -75,6 +78,8 @@ bbhost 无需完整模式即可用方向键切层，但方向键同时仍会传�
 python -m pip install -r requirements-dev.txt
 dotnet run --project tools/LayerTests -c Release
 dotnet run --project tools/SettingsTests -c Release
+dotnet run --project tools/SaveProgressTests -c Release
+python tools/verify_inventory.py
 python tools/verify_english.py
 python tools/verify_layers.py
 python tools/verify.py
@@ -82,7 +87,7 @@ python tools/verify_quests.py
 python tools/verify_collision.py
 ```
 
-浏览器检查需要 Microsoft Edge 和本地地图数据；结果保存在不上传的 `artifacts/`。两项 .NET 检查无需游戏数据。Windows 运行包按上方 publish 命令构建。
+浏览器检查需要 Microsoft Edge 和本地地图数据；结果保存在不上传的 `artifacts/`。.NET 检查无需游戏数据。Windows 运行包按上方 publish 命令构建。
 
 ## 许可与致谢
 

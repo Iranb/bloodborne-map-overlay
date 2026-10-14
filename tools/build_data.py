@@ -149,5 +149,28 @@ for area in data['maps']:
    q=quest_by_entity[marker['entity']]
    marker.update(questId=q['id'],questTitle=q['title'],questEn=q['en'])
 (OUT/'maps.json').write_text(json.dumps(data,ensure_ascii=False,separators=(',',':')),'utf-8')
+# Local inventory names include shops/rewards without inventing pickup positions.
+# Like maps.json, this extracted FMG catalog is private generated game data.
+catalog={}
+for cat,table in [(0,'武器名'),(1,'防具名'),(4,'アイテム名')]:
+ for iid in sorted(set(texts.get('engus/'+table,{}))|set(texts.get('zhotw/'+table,{}))):
+  if iid<=0 or (cat==0 and iid%10000):continue
+  name,en,kind=item(cat,iid)
+  if not (text(table,iid) or text(table,iid,'engus')):continue
+  catalog[str(cat)+':'+str(iid)]={'name':name,'en':en,'kind':kind}
+for iid,gen in params.get('GemGenParam',{}).items():
+ effect=gen.get('gemeffectGenParam_0',-1)
+ if effect<=0:continue
+ name,en,kind=item(8,iid)
+ if not en:continue
+ key=('rune:' if kind=='rune' else 'gem:')+str(effect)
+ catalog.setdefault(key,{'name':name,'en':en,'kind':kind})
+for effect,values in params.get('GemeffectParam',{}).items():
+ # Random gems can use effects not referenced by any fixed GemGen lot.
+ if effect<=0 or values.get('sortCategory')==2:continue
+ mid=1000000+values.get('gemNameIdOffset',0)
+ name=text('魔石名',mid);en=text('魔石名',mid,'engus')
+ if name or en:catalog.setdefault('gem:'+str(effect),{'name':name or en,'en':en,'kind':'gem'})
+(OUT/'inventory-catalog.json').write_text(json.dumps({'version':1,'items':catalog},ensure_ascii=False,separators=(',',':')),'utf-8')
 counts=collections.Counter(x['kind'] for m in data['maps'] for x in m['markers'])
 print(json.dumps({'maps':len(data['maps']),'markers':counts,'unlocated':sum(x['p'] is None for m in data['maps'] for x in m['markers'])},ensure_ascii=False))

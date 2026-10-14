@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0-windows</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+ <ItemGroup><Compile Include="../../overlay-app/SaveInventory.cs" Link="SaveInventory.cs"/><Compile Include="../../overlay-app/SaveProgressReader.cs" Link="SaveProgressReader.cs"/><Compile Include="../../overlay-app/MapSettings.cs" Link="MapSettings.cs"/></ItemGroup>
+</Project>

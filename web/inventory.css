@@ -1,0 +1,22 @@
+#inventory-dialog{padding:0;width:min(700px,calc(100vw - 24px));max-width:calc(100vw - 24px);height:min(700px,calc(100dvh - 24px));max-height:calc(100dvh - 24px);overflow:hidden}
+#inventory-dialog[open]{display:flex;flex-direction:column}
+#inventory-dialog .inventory-head{display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid var(--line);flex:none}
+#inventory-dialog .inventory-head strong{flex:1;color:#ead6ae;font-size:15px}
+#inventory-dialog button{float:none;font-size:12px;padding:6px}
+#inventory-dialog .inventory-body{overflow:auto;padding:12px;min-height:0;overscroll-behavior:contain}
+#inventory-dialog p{margin:0 0 10px;font-size:12px;line-height:1.6}
+#inventory-snapshot{color:#e0c48f}
+#inventory-search{width:100%;padding:8px;border:1px solid var(--line);background:#0c131a;color:white;border-radius:5px;margin-bottom:12px}
+#inventory-dialog table{width:100%;border-collapse:collapse;font-size:12px}
+#inventory-dialog th,#inventory-dialog td{padding:8px 5px;border-bottom:1px solid var(--line);text-align:left}
+#inventory-dialog th{position:sticky;top:-12px;background:#151e28}
+#inventory-dialog td:not(:first-child),#inventory-dialog th:not(:first-child){width:65px;text-align:right}
+#inventory-dialog td small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.row .inventory-stock{display:inline-block;width:100%;color:#c7b58b;font-size:10px;text-decoration:none;margin-top:3px}
+#details .detail-stock{border-top:1px solid #43515c;margin-top:6px;padding-top:6px;max-height:125px;overflow:auto}
+#details .detail-stock p{font-size:11px;margin:3px 0;color:#c7b58b}
+#details .manual-evidence{display:block;color:#d1ad7a;margin-top:5px}
+#details .detail-actions{flex-wrap:wrap}
+.mini-map #details .detail-stock p{display:block}
+@media(max-width:480px){.mini-map #mini-controls{gap:3px;padding:3px 5px}.mini-map #mini-controls button{font-size:10px;padding:3px 5px;min-width:24px}}
+@media(max-width:480px){#inventory-dialog .inventory-head{gap:5px;padding:8px}#inventory-dialog .inventory-head strong{font-size:12px}#inventory-dialog button{font-size:10px}}

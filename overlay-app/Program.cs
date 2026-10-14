@@ -115,12 +115,25 @@ sealed class MapWindow:Form {
  async void OnMessage(object? sender,CoreWebView2WebMessageReceivedEventArgs e){try{using var doc=JsonDocument.Parse(e.WebMessageAsJson);var msg=doc.RootElement;switch(msg.GetProperty("type").GetString()){
   case "language":AppLanguage.Set(msg.GetProperty("english").GetBoolean());LocalizeNative();break;
   case "compact":ToggleCompact();break;case "hide":SetPadMode(false);Hide();break;case "lock":TogglePass();break;
-  case "ready":frontendReady=true;sentPosition=null;sentStatus=null;nextSave=DateTime.MinValue;if(Environment.GetCommandLineArgs().Contains("--follow"))Command("follow");break;
+  case "ready":frontendReady=true;sentPosition=null;sentStatus=null;nextSave=DateTime.MinValue;if(Environment.GetCommandLineArgs().Contains("--follow"))Command("follow");await RefreshInventory();break;
+  case "inventory-refresh":await RefreshInventory();break;
   case "gamepad":SetPadMode(!padMode);break;case "exit-gamepad":SetPadMode(false);break;case "borderless":Borderless();break;
   case "drag":ReleaseCapture();SendMessage(Handle,0xA1,new IntPtr(2),IntPtr.Zero);break;
   case "export":using(var dialog=new SaveFileDialog{Filter=L("探索記錄 (*.json)|*.json","Exploration records (*.json)|*.json"),FileName="Bloodborne-exploration.json"}){if(dialog.ShowDialog(this)==DialogResult.OK)File.WriteAllText(dialog.FileName,msg.GetProperty("content").GetString());}break;
   case "import":using(var dialog=new OpenFileDialog{Filter=L("探索記錄 (*.json)|*.json","Exploration records (*.json)|*.json")}){if(dialog.ShowDialog(this)!=DialogResult.OK)break;if(new FileInfo(dialog.FileName).Length>2_000_000)throw new InvalidDataException(L("記錄檔超過 2 MB","Record file exceeds 2 MB"));using var imported=JsonDocument.Parse(File.ReadAllText(dialog.FileName));await web.CoreWebView2.ExecuteScriptAsync("window.importRecords("+imported.RootElement.GetRawText()+")");}break;
  }}catch(Exception ex){MessageBox.Show(L("操作失敗：","Operation failed: ")+ex.Message,Text);}}
+ async Task RefreshInventory(){
+  if(progressBusy||!frontendReady)return;
+  string? root=reader.SaveDirectory??MapSettings.ResolveSaveDirectory("bbhost",null)??MapSettings.ResolveSaveDirectory("bbport",null);
+  if(root==null){Post(new{action="notice",text="請先設定存檔目錄。",textEn="Configure the save directory first."});return;}
+  var position=sentPosition;string sourceIdentity=progressIdentity;progressBusy=true;
+  try{
+   var progress=await Task.Run(()=>saves.Read(position?.name,root,true));
+   if(IsDisposed||progressIdentity!=sourceIdentity)return;
+   if(progress==null){Post(new{action="notice",text="尚未找到完整存檔；請等待遊戲保存。",textEn="No completed save found. Wait for the game to save."});return;}
+   lastProgress=progress;Post(new{action="progress",progress,offline=position==null,pid=position?.pid});
+  }finally{progressBusy=false;}
+ }
  void Post(object value){if(webReady&&!IsDisposed)web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(value));}
  async void PollLive(){
   if(DateTime.UtcNow>=nextAttach){nextAttach=DateTime.UtcNow.AddSeconds(2);using var game=Program.FindGame(reader);bool running=game!=null;
@@ -137,8 +150,8 @@ sealed class MapWindow:Form {
 
   var status=reader.ProcessId==0?"等待 Bloodborne":reader.Status;
   bool changed=position==null?sentPosition!=null:sentPosition==null||position.mapId!=sentPosition.mapId||position.name!=sentPosition.name||position.level!=sentPosition.level||position.pid!=sentPosition.pid||position.p.Zip(sentPosition.p,(a,b)=>(a-b)*(a-b)).Sum()>.0004||Math.Abs(position.yaw-sentPosition.yaw)>.004||position.cameraYaw.HasValue!=sentPosition.cameraYaw.HasValue||Math.Abs(position.cameraYaw.GetValueOrDefault()-sentPosition.cameraYaw.GetValueOrDefault())>.004;
-  if(Visible&&frontendReady&&(changed||status!=sentStatus)){bool resuming=sentPosition==null;Post(new{action="position",position,status,statusEn=reader.ProcessId==0?"Waiting for Bloodborne":reader.StatusEn});positionMessages++;sentPosition=position;sentStatus=status;if(resuming&&lastProgress!=null)Post(new{action="progress",progress=lastProgress});}
-  if(position!=null&&frontendReady&&!progressBusy&&DateTime.UtcNow>=nextSave){nextSave=DateTime.UtcNow.AddSeconds(15);progressBusy=true;string? saveDirectory=reader.SaveDirectory;string sourceIdentity=progressIdentity;bool force=lastProgress==null;try{var progress=await Task.Run(()=>saves.Read(position.name,saveDirectory,force));if(progress!=null&&progressIdentity==sourceIdentity&&!IsDisposed){lastProgress=progress;if(Visible)Post(new{action="progress",progress});}}finally{progressBusy=false;}}
+  if(Visible&&frontendReady&&(changed||status!=sentStatus)){bool resuming=sentPosition==null;Post(new{action="position",position,status,statusEn=reader.ProcessId==0?"Waiting for Bloodborne":reader.StatusEn});positionMessages++;sentPosition=position;sentStatus=status;if(resuming&&lastProgress!=null)Post(new{action="progress",progress=lastProgress,pid=position?.pid});}
+  if(position!=null&&frontendReady&&!progressBusy&&DateTime.UtcNow>=nextSave){nextSave=DateTime.UtcNow.AddSeconds(15);progressBusy=true;string? saveDirectory=reader.SaveDirectory;string sourceIdentity=progressIdentity;bool force=lastProgress==null;try{var progress=await Task.Run(()=>saves.Read(position.name,saveDirectory,force));if(progress!=null&&progressIdentity==sourceIdentity&&!IsDisposed){lastProgress=progress;if(Visible)Post(new{action="progress",progress,pid=position.pid});}}finally{progressBusy=false;}}
  }
  void Borderless(){if(gameHandle==IntPtr.Zero)return;var r=Screen.FromHandle(gameHandle).Bounds;SetWindowLong(gameHandle,-16,GetWindowLong(gameHandle,-16)&~0x00cf0000);SetWindowPos(gameHandle,IntPtr.Zero,r.Left,r.Top,r.Width,r.Height,0x0020|0x0004|0x0010);Post(new{action="notice",text="已設定遊戲無邊框全屏。",textEn="Game window set to borderless fullscreen."});}
  void SetPadMode(bool value){

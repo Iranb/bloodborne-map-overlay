@@ -8,6 +8,7 @@ miniButton('mini-zoom-in','＋',()=>{distance=Math.max(5,distance*.8);invalidate
 miniButton('mini-zoom-out','－',()=>{distance=Math.min(fullDistance*2,distance/ .8);invalidate();}).title='縮小地圖';
 miniButton('mini-route','導航',()=>{$('route').click();syncMini();});
 miniButton('mini-list','清單',()=>{miniPanel=!miniPanel;document.body.classList.toggle('mini-list-open',miniPanel);syncMini();resize();});
+miniButton('mini-inventory','背包',()=>$('inventory').click());
 miniButton('mini-overview','全圖',()=>{resetView();syncMini();});
 let runeFilterBefore=null;
 miniButton('mini-runes','符文',()=>{
@@ -17,7 +18,7 @@ miniButton('mini-runes','符文',()=>{
  refresh();resize();if(runeFilterBefore&&!map?.markers.some(m=>m.kind==='rune'))notify(tr('此區域沒有已確認的符文來源，請切換地圖。','No verified rune sources in this area; select another map.'));
 }).title='顯示目前區域全部符文，包括已持有；再按一次恢復篩選';
 const miniState=document.createElement('span');miniState.id='mini-state';miniBar.append(miniState);document.body.append(miniBar);
-function syncMini(){mapText($('mini-runes'),tr('符文','Runes'));mapAttribute($('mini-runes'),'aria-pressed',!!runeFilterBefore);mapText($('mini-follow'),tr('跟隨','Follow'));mapAttribute($('mini-follow'),'aria-pressed',follow);mapText($('mini-route'),tr('導航','Route'));mapAttribute($('mini-route'),'aria-pressed',!!routeTarget);mapText($('mini-list'),miniPanel?tr('收起','Close'):tr('清單','List'));mapAttribute($('mini-list'),'aria-pressed',miniPanel);mapText($('mini-overview'),tr('全圖','All'));mapText(miniState,live?(follow?tr('即時跟隨','Live follow'):tr('自由瀏覽','Free view')):tr('離線瀏覽','Offline'));}
+function syncMini(){mapText($('mini-inventory'),tr('背包','Bag'));mapText($('mini-runes'),tr('符文','Runes'));mapAttribute($('mini-runes'),'aria-pressed',!!runeFilterBefore);mapText($('mini-follow'),tr('跟隨','Follow'));mapAttribute($('mini-follow'),'aria-pressed',follow);mapText($('mini-route'),tr('導航','Route'));mapAttribute($('mini-route'),'aria-pressed',!!routeTarget);mapText($('mini-list'),miniPanel?tr('收起','Close'):tr('清單','List'));mapAttribute($('mini-list'),'aria-pressed',miniPanel);mapText($('mini-overview'),tr('全圖','All'));mapText(miniState,live?(follow?tr('即時跟隨','Live follow'):tr('自由瀏覽','Free view')):tr('離線瀏覽','Offline'));}
 window.setCompactView=function(value){
  const changed=miniMap!==value;miniMap=value;miniPanel=false;
  document.body.classList.toggle('mini-map',value);document.body.classList.remove('mini-list-open');

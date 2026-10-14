@@ -5,6 +5,7 @@ publish/
 web/data/*.mesh
 web/data/maps.json
 web/data/layers.json
+web/data/inventory-catalog.json
 tools/lib/
 **/__pycache__/
 *.pyc

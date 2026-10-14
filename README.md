@@ -12,6 +12,7 @@ A Windows desktop companion for Bloodborne with a compact overlay, read-only pla
 - Live position, facing, camera direction, automatic area selection and terrain routes.
 - Filters for lamps, bosses, NPCs, weapons, attire, runes, hunter tools, key items, gems, items and passages.
 - Three manual profiles, JSON import/export and optional autosave inventory/boss observations.
+- **Inventory** shows the latest completed save's bag and storage counts, including shop and quest rewards without map coordinates. Stock replaces previous quantities; pickup history remains separate. Offline snapshots show their character, slot and save time; **Refresh save** rereads the configured save folder.
 - English and Traditional Chinese UI, including all 19 quest guides, tray menus and messages. Use **EN / 繁中** to switch; the choice is remembered.
 - Compact/fullscreen views, always-on-top, opacity and mouse passthrough.
 
@@ -67,6 +68,8 @@ In bbhost, D-pad browsing works without full map mode and also sends the D-pad t
 
 The app opens the game with query/read permissions. It does not inject code or write memory. Save reading accepts two identical snapshots and never writes saves. Ownership may come from another source; previously consumed items may need manual correction. NPC proximity records a visit, not dialogue or quest completion. Lamps and passages need manual confirmation.
 
+Selecting a completed marker preserves its record. Only the checkbox, Shift-click, Space or the detail action changes a manual record. **Clear manual override** restores automatic observations for one marker. Current bag/storage counts are independent of manual progress and historical ownership. Owning a consumable does not check every pickup source of that item. Rune ownership requires a reference in the bag/storage, rather than an orphan entry in the save's object registry. Internal defaults for empty equipment slots are excluded. Counts update after the game saves; they are not a live view of unsaved inventory changes.
+
 Static collision cannot establish current door, elevator or one-way states. Disconnected terrain produces no invented route. Unknown passage destinations stay unspecified. Some geometry/pickups are missing; this is not a complete achievement or collection guide. Quest guides contain spoilers.
 
 ## Verification
@@ -75,6 +78,8 @@ Static collision cannot establish current door, elevator or one-way states. Disc
 python -m pip install -r requirements-dev.txt
 dotnet run --project tools/LayerTests -c Release
 dotnet run --project tools/SettingsTests -c Release
+dotnet run --project tools/SaveProgressTests -c Release
+python tools/verify_inventory.py
 python tools/verify_english.py
 python tools/verify_layers.py
 python tools/verify.py
@@ -82,7 +87,7 @@ python tools/verify_quests.py
 python tools/verify_collision.py
 ```
 
-Browser checks need Microsoft Edge and local map data. Reports go to ignored `artifacts/`. The two .NET checks need no game data. The Windows package is built with the publish command above.
+Browser checks need Microsoft Edge and local map data. Reports go to ignored `artifacts/`. The .NET checks need no game data. The Windows package is built with the publish command above.
 
 ## License and credits
 
