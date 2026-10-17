@@ -26,7 +26,7 @@
   signature=JSON.stringify(window.layerState?.contentFloors||[]);
  }
  function overview(){
-  const data=window.routeData;if(!data)return;const box=new THREE.Box3();for(const p of data.points)box.expandByPoint(new THREE.Vector3(...p));const center=box.center(),size=box.size();target.copy(center);distance=Math.max(30,size.length()*1.15);phi=.32;follow=false;viewFollow=false;toggleUI();syncMini();invalidate();
+  const data=window.routeData;if(!data)return;const box=new THREE.Box3();for(const p of data.points)box.expandByPoint(new THREE.Vector3(...p));const center=box.center(),size=box.size(),padding=miniMap?view.clientHeight/Math.max(110,view.clientHeight-105):1;target.copy(center);distance=Math.max(30,size.length()*1.15*padding);phi=.32;follow=false;viewFollow=false;toggleUI();syncMini();invalidate();
  }
  $('route-overview').onclick=overview;goal.onclick=overview;
  window.routeChanged=first=>{
