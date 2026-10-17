@@ -32,6 +32,7 @@ function recommend(){
  recommended=true;selected=choices[0].id;navigate(selected);refresh();
 }
 function guidance(){
+ if(window.updateRouteGuidance){window.updateRouteGuidance();return;}
  const points=window.routePoints;if(!live||!points?.length||!routeTarget||map?.id!==live.mapId)return;
  let best=Infinity,remaining=0,tail=0;
  for(let i=points.length-2;i>=0;i--){const a=points[i],b=points[i+1],d=b.map((v,j)=>v-a[j]),sq=d.reduce((s,v)=>s+v*v,0),t=sq?Math.max(0,Math.min(1,d.reduce((s,v,j)=>s+v*(live.p[j]-a[j]),0)/sq)):0,q=a.map((v,j)=>v+d[j]*t),gap=Math.hypot(...q.map((v,j)=>v-live.p[j])),length=Math.sqrt(sq);if(gap<best){best=gap;remaining=tail+(1-t)*length;}tail+=length;}
@@ -81,5 +82,5 @@ const readyPoll=setInterval(()=>{if(window.mapReady){clearInterval(readyPoll);to
 let passageLines=null;
 const refreshWithPassages=refresh;refresh=function(){refreshWithPassages();if(passageLines){scene.remove(passageLines);passageLines.geometry.dispose();passageLines.material.dispose();passageLines=null;}if(!map||!enabled.has('passage'))return;const geo=new THREE.Geometry();for(const m of map.markers.filter(x=>x.kind==='passage'&&x.p&&matches(x))){const yaw=(m.rotation?.[1]||0)*Math.PI/180,dx=Math.sin(yaw)*1.8,dz=Math.cos(yaw)*1.8;geo.vertices.push(new THREE.Vector3(m.p[0]-dx,m.p[1]+.4,m.p[2]-dz),new THREE.Vector3(m.p[0]+dx,m.p[1]+.4,m.p[2]+dz));}passageLines=new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:0x52dce5,transparent:true,opacity:.8,depthTest:false}));scene.add(passageLines);invalidate();};
 
-window.updateLiveDistances=function(){if(!live||map?.id!==live.mapId||getComputedStyle($('panel')).display==='none')return;const lookup=new Map(map.markers.map(m=>[m.id,m]));for(const row of $('list').children){const m=lookup.get(row.dataset.id);if(!m?.p)continue;const d=Math.hypot(...m.p.map((v,i)=>v-live.p[i])),dy=m.p[1]-live.p[1],s=d.toFixed(1)+' m'+(dy>4?' · '+tr('上層','Above'):dy< -4?' · '+tr('下層','Below'):' · '+tr('附近樓層','Same level'));const el=row.querySelector('small');if(el.textContent!==s)el.textContent=s;}};
+window.updateLiveDistances=function(){if(!live||map?.id!==live.mapId||getComputedStyle($('panel')).display==='none')return;const lookup=new Map(map.markers.map(m=>[m.id,m]));for(const row of $('list').children){const m=lookup.get(row.dataset.id);if(!m?.p)continue;const d=Math.hypot(...m.p.map((v,i)=>v-live.p[i])),s=d.toFixed(1)+' m · '+(window.markerLayerLabel?.(m)||tr('高度待確認','Height unconfirmed'));const el=row.querySelector('small');if(el.textContent!==s)el.textContent=s;}};
 window.collisionReady=function(){lastCoverAt=0;avoidanceStamp=0;if(!document.hidden)invalidate();};

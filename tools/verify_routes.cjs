@@ -1,0 +1,19 @@
+// Geometry regressions and an audit of locally generated assets. No game reads.
+const fs=require('fs'),path=require('path'),assert=require('assert');
+const root=path.resolve(__dirname,'..'),source=fs.readFileSync(path.join(root,'web/route-worker.js'),'utf8');
+function worker(positions){const output=[];const send=new Function('postMessage',`let onmessage;\n${source}\nreturn onmessage;`)(d=>output.push(d));send({data:{type:'build',token:'test',positions:new Float32Array(positions).buffer}});assert.equal(output[0].type,'built');return {stats:output[0],route(from,to){send({data:{type:'route',token:'test',request:1,from,to}});return output.at(-1);},anchor(markers){send({data:{type:'anchors',token:'test',markers}});return output.at(-1);}};}
+const flat=(x,z,y=0,size=4)=>[x,y,z,x,y,z+size,x+size,y,z,x+size,y,z,x,y,z+size,x+size,y,z+size];
+const large=worker(flat(0,0,0,100));let r=large.route([45,.05,45],[55,2,55]);assert.equal(r.type,'route');assert(r.startGap<.1&&r.endGap===2);assert(Math.abs(r.length-Math.sqrt(200))<.01,'Interior anchors must not detour via remote vertices');
+const stacked=worker([...flat(0,0),...flat(0,0,4)]);assert.equal(stacked.route([1,0,1],[1,4,1]).type,'error','Disconnected floors must not connect');assert.equal(stacked.route([1,0,1],[2,1.5,2]).goal[1],0,'Floating item must project down, not snap to upper floor');
+const underside=worker([0,0,0,4,0,0,0,0,4]);assert.equal(underside.stats.nodes,0,'Ceiling undersides are not walkable');assert.equal(underside.route([0,0,0],[1,0,1]).type,'error');
+const t=worker([...flat(0,0),4,0,1,4,0,3,8,0,1]);assert.equal(t.route([1,0,2],[6,0,1.5]).type,'route','T junctions on original boundary edges must connect');
+const stairs=worker([...flat(0,0),...flat(4.1,0,.35)]);assert.equal(stairs.route([1,0,1],[6,.35,1]).type,'route','Short supported stair seam should connect');
+const wall=[4.05,0,-1,4.05,3,-1,4.05,0,5,4.05,3,-1,4.05,3,5,4.05,0,5];const blocked=worker([...flat(0,0),...flat(4.1,0,.35),...wall]);assert.equal(blocked.route([1,0,1],[6,.35,1]).type,'error','Static wall must block a nearby step');
+const gap=worker([...flat(0,0),...flat(5,0)]);assert.equal(gap.route([1,0,1],[6,0,1]).type,'error','Open gaps must not receive invented bridges');
+const maps=JSON.parse(fs.readFileSync(path.join(root,'web/data/maps.json'))).maps,results=[];let crossFloorCase=null;
+for(const area of maps){const start=Date.now(),b=fs.readFileSync(path.join(root,'web/data',area.mesh)),w=worker(new Float32Array(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength))),lamps=area.markers.filter(m=>m.kind==='lamp'&&m.p),runes=area.markers.filter(m=>m.kind==='rune'&&m.p),routes=[];
+ for(const rune of runes){const lamp=lamps.toSorted((a,b)=>Math.hypot(...a.p.map((v,i)=>v-rune.p[i]))-Math.hypot(...b.p.map((v,i)=>v-rune.p[i])))[0];if(!lamp)continue;const result=w.route(lamp.p,rune.p);routes.push({id:rune.id,lamp:lamp.id,ok:result.type==='route',error:result.errorEn});if(result.type==='route'){assert(result.points.every(p=>p.length===3&&p.every(Number.isFinite)));assert(result.startGap<=Math.sqrt(18)&&result.endGap<=Math.sqrt(45));if(!crossFloorCase&&area.id==='m24_01_00_00'&&Math.abs(result.start[1]-result.goal[1])>8)crossFloorCase={map:area.id,marker:rune.id,from:lamp.p,result:{...result,corridor:undefined}};}}
+ const result={map:area.id,ms:Date.now()-start,...w.stats,runes:runes.length,ok:routes.filter(r=>r.ok).length,routes};results.push(result);console.log(`${area.id}: ${result.ok}/${runes.length} runes, ${result.ms} ms, ${w.stats.components} components`);
+}
+assert.equal(results.find(r=>r.map==='m24_01_00_00').ok,7);assert(crossFloorCase);
+const out=path.join(root,'artifacts/routes');fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'geometry.json'),JSON.stringify({fixtures:8,results,crossFloorCase},null,2));console.log('PASS: interior projection, ceilings, stacked floors, T junctions, supported stairs, walls and missing geometry');

@@ -1,7 +1,7 @@
 'use strict';
 // All topology is precomputed from static assets. Layer input adds no game reads.
 (()=>{
- const css=document.createElement('link');css.rel='stylesheet';css.href='layers.css';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='layers.css?v=routes-3';document.head.append(css);
  let catalog=null,area=null,index=null,pinned=false,chosen=null,linksOpen=false,nodes=[];
  let generation=0,ready=false,drawnChosen=undefined,playerIndex=null;
  const layerMargin=.45;
@@ -23,7 +23,9 @@
   // Assign empty bands to the nearest content band. Geometry stays continuous;
   // only redundant layer boundaries disappear, and original anchors stay exact.
   const floors=occupied.map((f,index)=>{const members=raw.floors.filter(x=>mapping[x.index]===index);return{...f,index,low:members[0].low,high:members.at(-1).high,sourceIndex:f.index,content:counts[f.index],triangles:members.reduce((n,x)=>n+x.triangles,0)};});
-  const links=raw.links.map(l=>({...l,from:mapping[l.from],to:l.to===null?null:mapping[l.to]})).filter(l=>l.to===null||l.from!==l.to);
+ // A slice-plane intersection is not a verified stair/ladder entrance. Only
+ // actual route crossings may claim to connect displayed floors.
+ const links=raw.links.filter(l=>l.kind!=='road').map(l=>({...l,from:mapping[l.from],to:null}));
   return{floors,contentFloors:floors.map(f=>({index:f.index,low:f.low,high:f.high,...f.content})),links,sourceFloorCount:raw.floors.length};
  }
  const floor=()=>index===null?null:area?.floors[index];
@@ -34,12 +36,16 @@
  // last floor within a small boundary margin so steps and ramps do not flicker.
  function trackPlayer(){const y=playerY();if(y===null||!area?.floors.length)return null;const previous=area.floors[playerIndex];return previous&&y>=previous.low-layerMargin&&y<previous.high+layerMargin?playerIndex:at(y);}
  window.layerContains=contains;
+ window.layerAtHeight=at;
+ window.markerLayerLabel=m=>{const p=window.markerSurfaces?.get(m.id);if(!p||playerY()===null||!area?.floors.length)return tr('高度待確認','Height unconfirmed');const dest=at(p[1]),from=trackPlayer();return dest===from?tr('同層','Same layer'):`L${dest+1} · ${tr(dest>from?'需上行':'需下行',dest>from?'Go up':'Go down')}`;};
  const title=i=>`L${i+1}`;
- const name=link=>{if(link.kind==='road')return tr('道路連接','Road crossing')+' '+title(link.from)+' ↔ '+title(link.to);const marker=map.markers.find(m=>m.id===link.marker);return marker?label(marker):link.id;};
- const symbol=link=>link.kind==='road'?(index===link.to?'↓':'↑'):link.kind==='ladder'?tr('梯','L'):link.kind==='mechanism'?tr('機','M'):tr('門','D');
- function snapshot(){window.layerState={ready,mapId:map?.id,index,pinned,playerIndex,floor:floor(),floorCount:area?.floors.length||0,sourceFloorCount:area?.sourceFloorCount||0,contentFloors:area?.contentFloors||[],connectionCount:area?.links.length||0,selectedLink:chosen};}
+ const name=link=>{if(link.kind==='route')return `${link.order}. ${tr(link.to>link.from?'沿路上行':'沿路下行',link.to>link.from?'Follow path up':'Follow path down')} ${title(link.from)} → ${title(link.to)}`;const marker=map.markers.find(m=>m.id===link.marker);return marker?label(marker):link.id;};
+ const symbol=link=>link.kind==='route'?`${link.order}${link.to>link.from?'↑':'↓'}`:link.kind==='ladder'?tr('梯','L'):link.kind==='mechanism'?tr('機','M'):tr('門','D');
+ const allLinks=()=>[...(window.routeCrossings||[]),...(area?.links||[])];
+ function snapshot(){window.layerState={ready,mapId:map?.id,index,pinned,playerIndex,floor:floor(),floors:area?.floors||[],floorCount:area?.floors.length||0,sourceFloorCount:area?.sourceFloorCount||0,contentFloors:area?.contentFloors||[],connectionCount:allLinks().length,selectedLink:chosen};}
  function apply(){material.uniforms.floorBottom.value=floor()?.low??-1e6;material.uniforms.floorTop.value=floor()?.high??1e6;snapshot();}
- function relevant(){return area?.links.filter(l=>index===null?l.kind!=='road':l.from===index||l.to===index)||[];}
+ function relevant(){return allLinks().filter(l=>l.kind==='route'||index===null||l.from===index);}
+ window.refreshLayerLinks=()=>{if(ready){snapshot();buildLinks();invalidate();}};
  function choose(next,manual=true){if(!area)return;if(manual)playerIndex=trackPlayer();index=next===null||!area.floors.length?null:Math.max(0,Math.min(area.floors.length-1,next));pinned=manual;chosen=null;detail.hidden=true;if(index!==null&&manual&&cut){cut=false;$('slice-control').hidden=true;mapAttribute($('slice'),'aria-pressed',false);applySlice();}apply();ui();buildLinks();invalidate();}
  function browse(next){choose(next);follow=false;viewFollow=false;toggleUI();syncMini();if(!floor())return;const candidates=relevant().filter(l=>l.kind==='road').sort((a,b)=>Math.hypot(a.p[0]-target.x,a.p[2]-target.z)-Math.hypot(b.p[0]-target.x,b.p[2]-target.z));const point=candidates[0]?.p??floor().focus;if(point&&Math.hypot(point[0]-target.x,point[2]-target.z)>distance*.6){target.x=point[0];target.z=point[2];}target.y=(floor().low+floor().high)/2;invalidate();}
  function step(delta){if(!area?.floors.length||document.querySelector('dialog[open]'))return;const base=index??at(live?.mapId===map.id?live.p[1]:target.y);const next=Math.max(0,Math.min(area.floors.length-1,base+delta));if(next===base){notify(tr(delta>0?'已到最高層':'已到最低層',delta>0?'Highest layer':'Lowest layer'));return;}browse(next);}
@@ -61,12 +67,12 @@
  }
  function buildLinks(){
   marks.replaceChildren();list.replaceChildren();nodes=[];drawnChosen=undefined;if(!area)return;
-  const note=document.createElement('p');note.textContent=tr('青色箭頭為道路跨層位置；梯子／門／機關只標已知位置，另一端需在遊戲確認。','Cyan arrows mark road crossings. Ladder/door/device destinations need in-game confirmation.');list.append(note);
+  const note=document.createElement('p');note.textContent=tr('編號箭頭依導航順序標出實際路線換層處。梯子／機關僅為互動位置，沒有確認的另一端。','Numbered arrows follow the route between layers. Ladder/device icons mark interactions with unconfirmed destinations.');list.append(note);
   const candidates=relevant();
   // Stable order keeps list browsing predictable; nearest links appear first.
-  const origin=live?.mapId===map.id?live.p:target.toArray();candidates.sort((a,b)=>Math.hypot(a.p[0]-origin[0],a.p[2]-origin[2])-Math.hypot(b.p[0]-origin[0],b.p[2]-origin[2]));
+  const origin=live?.mapId===map.id?live.p:target.toArray();candidates.sort((a,b)=>(a.kind==='route'?0:1)-(b.kind==='route'?0:1)||(a.kind==='route'?a.order-b.order:Math.hypot(a.p[0]-origin[0],a.p[2]-origin[2])-Math.hypot(b.p[0]-origin[0],b.p[2]-origin[2])));
   for(const l of candidates){
-   const node=document.createElement('button');node.className='layer-link-marker';node.dataset.id=l.id;node.textContent=symbol(l);node.title=name(l);node.setAttribute('aria-label',name(l));node.onclick=()=>focus(l.id);marks.append(node);nodes.push({l,node});
+   const node=document.createElement('button');node.className='layer-link-marker';node.dataset.id=l.id;node.dataset.kind=l.kind;node.textContent=symbol(l);node.title=name(l);node.setAttribute('aria-label',name(l));node.onclick=()=>focus(l.id);marks.append(node);nodes.push({l,node});
    const row=document.createElement('div');row.className='layer-link-row';row.dataset.id=l.id;
    const button=document.createElement('button');button.textContent=name(l);button.onclick=()=>focus(l.id);row.append(button);
    if(l.to!==null&&index!==null){const jump=document.createElement('button');jump.className='layer-jump';jump.textContent=title(index===l.from?l.to:l.from)+' ↗';jump.onclick=()=>jumpLink(l.id);row.append(jump);}
@@ -75,13 +81,13 @@
   if(!candidates.length){const empty=document.createElement('p');empty.textContent=tr('本層尚無已確認的連接位置。','No evidenced crossings in this layer.');list.append(empty);}
  }
  function focus(id){
-  const link=area?.links.find(l=>l.id===id);if(!link)return;
+  const link=allLinks().find(l=>l.id===id);if(!link)return;
   follow=false;viewFollow=false;toggleUI();syncMini();target.set(...link.p);distance=Math.max(24,Math.min(distance,48));chosen=id;
-  detail.hidden=false;detail.innerHTML=`<b>${esc(name(link))}</b><p>${esc(link.kind==='road'?tr('原始路面與分層邊界相交的位置；可切換到另一層查看同一處。門、機關與單向通行請依遊戲現況。','An original road intersects this layer boundary. View the same location on the other layer. Check dynamic and one-way states in game.'):tr('事件確認的通道位置；資料沒有可靠的另一端座標，未指定目的樓層。','Event-confirmed passage anchor. No reliable destination coordinates or target layer.'))}</p>${link.to!==null?'<button id="layer-link-jump"></button>':''}<button id="layer-link-close">${tr('關閉','Close')}</button>`;
+  detail.hidden=false;detail.innerHTML=`<b>${esc(name(link))}</b><p>${esc(link.kind==='route'?tr('沿導航線繼續走到另一層；箭頭是路線經過分層邊界的位置，不代表獨立梯子或入口。','Continue along the route to the next layer. This marks a route crossing, not a separate ladder or entrance.'):tr('事件確認的互動位置；另一端及機關狀態需在遊戲確認。','Event-confirmed interaction position; check its destination and state in game.'))}</p>${link.to!==null?'<button id="layer-link-jump"></button>':''}<button id="layer-link-close">${tr('關閉','Close')}</button>`;
   if(link.to!==null){$('layer-link-jump').textContent=tr('查看另一層','Other layer');$('layer-link-jump').onclick=()=>jumpLink(id);}
   $('layer-link-close').onclick=()=>{chosen=null;detail.hidden=true;snapshot();invalidate();};snapshot();invalidate();
  }
- function jumpLink(id){const link=area?.links.find(l=>l.id===id);if(!link||link.to===null)return;const next=index===link.to?link.from:link.to;choose(next);focus(id);}
+ function jumpLink(id){const link=allLinks().find(l=>l.id===id);if(!link||link.to===null)return;const next=index===link.to?link.from:link.to;choose(next);focus(id);}
  function project(){
   const changed=drawnChosen!==chosen;
   for(const {l,node} of nodes){const p=new THREE.Vector3(...l.p);p.y+=.35;p.project(camera);const near=!miniMap||Math.hypot(l.p[0]-target.x,l.p[2]-target.z)<distance*1.5||l.id===chosen;const visible=near&&p.z>=-1&&p.z<=1&&Math.abs(p.x)<1&&Math.abs(p.y)<1;mapHidden(node,!visible);if(visible)mapPlace(node,(p.x+1)*view.clientWidth/2,(1-p.y)*view.clientHeight/2);if(changed)node.classList.toggle('selected',l.id===chosen);}
@@ -106,19 +112,20 @@
   if(pinned){if(previous===null||next!==previous)window.followPlayerLayer();else snapshot();}
   else if(index!==next)choose(next,false);else snapshot();
  };
- window.revealMarkerLayer=m=>{if(m?.p&&area&&index!==null&&!contains(m.p[1]))choose(at(m.p[1]));};
+ window.revealMarkerLayer=m=>{if(live?.mapId===map?.id)return;const p=window.markerSurfaces?.get(m?.id)||m?.p;if(p&&area&&index!==null&&!contains(p[1]))choose(at(p[1]));};
  const previousFocus=focusMarker;focusMarker=function(id){const m=map?.markers.find(m=>m.id===id);window.revealMarkerLayer(m);previousFocus(id);};
  const previousRender=render;render=function(){
   // Pinned layers keep horizontal follow while the camera targets that height.
   const actualFollow=follow;if(pinned&&floor()&&follow){follow=false;target.set(live?.mapId===map.id?live.p[0]:target.x,(floor().low+floor().high)/2,live?.mapId===map.id?live.p[2]:target.z);}
   try{apply();previousRender();const y=playerY(),inMargin=!pinned&&floor()&&y!==null&&y>=floor().low-layerMargin&&y<floor().high+layerMargin;if(!contains(y??target.y)&&!inMargin)mapHidden(arrow,true);project();}finally{follow=actualFollow;}
  };
- // Route and passage lines use the same height clipping as the terrain.
+ // Passage anchors follow terrain slices. The complete navigation line stays
+ // visible: gold on the current layer, dashed cyan on the other layers.
  const previousDraw=renderer.render.bind(renderer);
  const clipped=new WeakMap();
  renderer.render=function(...args){
   for(const object of [navigation,passageLines]){if(!object)continue;if(!clipped.has(object)){
-   const old=object.material;object.material=new THREE.ShaderMaterial({uniforms:{floorBottom:material.uniforms.floorBottom,floorTop:material.uniforms.floorTop,color:{type:'c',value:old.color},opacity:{type:'f',value:old.opacity}},vertexShader:'varying float h;void main(){h=position.y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:'varying float h;uniform float floorBottom;uniform float floorTop;uniform vec3 color;uniform float opacity;void main(){if(h<floorBottom||h>=floorTop)discard;gl_FragColor=vec4(color,opacity);}',transparent:true,depthTest:false});old.dispose();clipped.set(object,true);
+   const old=object.material,isRoute=object===navigation;object.material=new THREE.ShaderMaterial({uniforms:{floorBottom:material.uniforms.floorBottom,floorTop:material.uniforms.floorTop,color:{type:'c',value:old.color},opacity:{type:'f',value:old.opacity}},vertexShader:(isRoute?'attribute float lineDistance;varying float d;':'')+'varying float h;void main(){h=position.y;'+(isRoute?'d=lineDistance;':'')+'gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:(isRoute?'varying float d;':'')+'varying float h;uniform float floorBottom;uniform float floorTop;uniform vec3 color;uniform float opacity;void main(){bool outside=h<floorBottom||h>=floorTop;'+(isRoute?'if(outside&&mod(d,5.0)>3.5)discard;gl_FragColor=vec4(outside?vec3(.32,.87,.94):color,opacity);':'if(outside)discard;gl_FragColor=vec4(color,opacity);')+'}',transparent:true,depthTest:false,depthWrite:false});old.dispose();clipped.set(object,true);
   }}return previousDraw(...args);
  };
  const previousCommand=window.mapCommand;window.mapCommand=function(cmd){if(cmd==='layer-up')return step(1);if(cmd==='layer-down')return step(-1);const result=previousCommand(cmd);if(cmd==='follow')window.followPlayerLayer();return result;};
@@ -128,6 +135,6 @@
  $('layer-up').onclick=()=>step(1);$('layer-down').onclick=()=>step(-1);$('layer-select').onchange=()=>browse($('layer-select').value==='all'?null:Number($('layer-select').value));
  $('layer-player').onclick=()=>window.followPlayerLayer();$('layer-links').onclick=()=>{linksOpen=!linksOpen;ui();};
  document.addEventListener('keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey||document.querySelector('dialog[open]')||['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();if(!e.repeat)step(e.key==='ArrowUp'?1:-1);}});
- const previousHelp=$('help-button').onclick;$('help-button').onclick=()=>{previousHelp();const note=document.createElement('p');note.textContent=tr('自動切換到人物所在層，樓層邊界有防抖。方向鍵上下可暫時瀏覽別層，人物換層後自動恢復；點「自動樓層」或開啟「跟隨」立即返回。只列含 NPC 或物品的層，已持有物品仍計入，空層道路併入相鄰層。並非官方樓層編號。連接可定位及切換另一層。bbhost 上方向鍵同時仍會傳給遊戲，請在安全位置瀏覽。','Layers follow the player automatically with a small boundary margin. D-pad up/down temporarily browses other layers; tracking resumes when the player changes layer. Auto layer or enabling Follow returns immediately. Only layers with NPCs or items are listed, including collected items. Empty roads join nearby layers. These are not official floor numbers. Links locate crossings. In bbhost the D-pad also reaches the game; browse in a safe spot.');$('help').insertBefore(note,$('help-close'));};
+ const previousHelp=$('help-button').onclick;$('help-button').onclick=()=>{previousHelp();const note=document.createElement('p');note.textContent=tr('自動切換到人物所在層，樓層邊界有防抖。方向鍵上下可暫時瀏覽別層，人物換層後自動恢復；點「自動樓層」或開啟「跟隨」立即返回。只列含 NPC 或物品的層，已持有物品仍計入，空層道路併入相鄰層。並非官方樓層編號。導航顯示完整跨層路線，金線為本層、青色虛線為其他層。編號箭頭為路線換層處，可查看另一層；梯子／機關僅標互動位置。bbhost 上方向鍵同時仍會傳給遊戲，請在安全位置瀏覽。','Layers follow the player automatically with a small boundary margin. D-pad up/down temporarily browses other layers; tracking resumes when the player changes layer. Auto layer or enabling Follow returns immediately. Only layers with NPCs or items are listed, including collected items. Empty roads join nearby layers. These are not official floor numbers. The entire route stays visible: gold on this layer, dashed cyan on others. Numbered arrows mark route crossings; ladders/devices only mark interactions. In bbhost the D-pad also reaches the game; browse in a safe spot.');$('help').insertBefore(note,$('help-close'));};
  dataPromise.then(()=>{if(window.mapReady)load();});
 })();

@@ -7,9 +7,10 @@ A Windows desktop companion for Bloodborne with a compact overlay, read-only pla
 ## Features
 
 - 16 base-game and The Old Hunters areas; orbit, pan, zoom, overhead view and roof cutaway.
-- Only layers containing NPCs or items appear in the selector. Collected items still count; empty road bands merge into adjacent layers. Original geometry and road-crossing anchors are retained.
-- Layers automatically follow the player's height, with a small margin to prevent flicker at boundaries. D-pad or keyboard up/down temporarily browses other layers; tracking resumes when the player changes layer. **Auto layer** or enabling **Follow** returns immediately. **Links** shows crossings and known ladder, door and device anchors.
-- Live position, facing, camera direction, automatic area selection and terrain routes.
+- Only layers containing NPCs or items appear in the selector. Collected items still count; empty road bands merge into adjacent layers. Original geometry is retained.
+- Layers automatically follow the player's height, with a small margin to prevent flicker at boundaries. D-pad or keyboard up/down temporarily browses other layers; tracking resumes when the player changes layer. **Auto layer** or enabling **Follow** returns immediately. **Links** shows numbered crossings along the current route and known ladder/device interaction anchors. Slice intersections are no longer shown as entrances.
+- Live position, facing, camera direction, automatic area selection and continuous terrain routes across layers. Selecting a target retains the player’s layer. The full route fits into one view: gold on this layer, dashed cyan on other layers, numbered up/down crossings and a destination label. **Whole route** fits the route again; **Follow** returns to the player.
+- Item and rune anchors project onto upward triangle interiors rather than remote vertices or ceiling undersides. Short stair seams require nearby support and wall clearance. Unconnected geometry and unknown ladder/elevator destinations remain explicit route failures.
 - Filters for lamps, bosses, NPCs, weapons, attire, runes, hunter tools, key items, gems, items and passages.
 - Three manual profiles, JSON import/export and optional autosave inventory/boss observations.
 - **Inventory** shows the latest completed save's bag and storage counts, including shop and quest rewards without map coordinates. Stock replaces previous quantities; pickup history remains separate. Offline snapshots show their character, slot and save time; **Refresh save** rereads the configured save folder.
@@ -82,6 +83,8 @@ dotnet run --project tools/SaveProgressTests -c Release
 python tools/verify_inventory.py
 python tools/verify_english.py
 python tools/verify_layers.py
+node tools/verify_routes.cjs
+python tools/verify_routes.py
 python tools/verify.py
 python tools/verify_quests.py
 python tools/verify_collision.py

@@ -1,7 +1,7 @@
-"""Build height bands and evidenced ramp crossings from unchanged collision meshes.
+"""Build browsing height bands and known interaction anchors.
 
-Bands are browsing slices, not official floor numbers. A road link must intersect
-one original upward triangle; event passages retain only their known anchor.
+Slice-plane intersections are not entrances. Actual route crossings are derived
+at runtime from a continuous path through the full-area walkable geometry.
 """
 import json
 from pathlib import Path
@@ -39,50 +39,10 @@ def build(area, triangles):
             point = road[indices[int(np.argmax(weights[indices]))]].mean(axis=0)
             floor['focus'] = [round(float(v), 4) for v in point]
         floor['markers'] = sum(floor['low'] <= y < floor['high'] for y in marker_y)
+    # Floor slices are a viewing aid, not a navigation graph. Generate only
+    # exact interaction anchors; route crossings are computed from the actual
+    # full-area path in the browser after merged content floors are known.
     links = []
-    for boundary_index, y in enumerate(edges[1:-1], 1):
-        candidates = road[(heights.min(axis=1) < y-.01) & (heights.max(axis=1) > y+.01)]
-        segments = []
-        owners = {}
-        parents = []
-        def find(i):
-            while parents[i] != i:
-                parents[i] = parents[parents[i]]
-                i = parents[i]
-            return i
-        for tri in candidates:
-            points = []
-            for a, b in ((tri[0], tri[1]), (tri[1], tri[2]), (tri[2], tri[0])):
-                if (a[1] <= y < b[1]) or (b[1] <= y < a[1]):
-                    points.append(a+(b-a)*((y-a[1])/(b[1]-a[1])))
-            if len(points) != 2 or np.linalg.norm(points[0]-points[1]) < .02:
-                continue
-            i = len(segments)
-            segments.append(points)
-            parents.append(i)
-            for point in points:
-                key = tuple(np.round(point[[0, 2]]/.05).astype(int))
-                if key in owners:
-                    parents[find(i)] = find(owners[key])
-                else:
-                    owners[key] = i
-        components = {}
-        for i, segment in enumerate(segments):
-            components.setdefault(find(i), []).append(segment)
-        anchors = []
-        for component in components.values():
-            lengths = [float(np.linalg.norm(a-b)) for a, b in component]
-            if sum(lengths) < .6:
-                continue
-            a, b = component[int(np.argmax(lengths))]
-            point = (a+b)*.5  # lies on an evidenced crossing, never a guessed bridge
-            if any(np.linalg.norm(point-p) < 2 for p in anchors):
-                continue
-            anchors.append(point)
-        for point in sorted(anchors, key=lambda p: (float(p[0]), float(p[2]))):
-            links.append({'id': f"{area['id']}:road-link:{boundary_index}:{len(links)}",
-                          'kind': 'road', 'from': boundary_index-1, 'to': boundary_index,
-                          'p': [round(float(v), 4) for v in point], 'boundary': y})
     for marker in area['markers']:
         if marker['kind'] != 'passage' or not marker.get('p'):
             continue
@@ -94,12 +54,12 @@ def build(area, triangles):
 
 def main():
     maps = json.loads((DATA/'maps.json').read_text('utf-8'))['maps']
-    result = {'version': 1, 'bandMetres': 8, 'maps': {}}
+    result = {'version': 2, 'bandMetres': 8, 'maps': {}}
     for area in maps:
         triangles = np.fromfile(DATA/area['mesh'], dtype='<f4').reshape(-1, 3, 3)
         entry = build(area, triangles)
         result['maps'][area['id']] = entry
-        print(area['id'], len(entry['floors']), 'bands', sum(x['kind']=='road' for x in entry['links']), 'road crossings', flush=True)
+        print(area['id'], len(entry['floors']), 'bands', len(entry['links']), 'interaction anchors', flush=True)
     (DATA/'layers.json').write_text(json.dumps(result, ensure_ascii=False, separators=(',', ':')), 'utf-8')
 
 

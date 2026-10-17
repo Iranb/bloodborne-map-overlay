@@ -15,27 +15,14 @@ fixture={'id':'test','markers':[]}
 stacked=np.array([[[0,0,0],[0,0,4],[4,0,0]],[[0,16,0],[0,16,4],[4,16,0]]],dtype=np.float32)
 assert not build(fixture,stacked)['links'], 'Stacked disconnected floors cannot become links'
 ramp=np.array([[[0,0,0],[0,20,30],[4,0,0]]],dtype=np.float32)
-assert build(fixture,ramp)['links'], 'Actual ramp must produce crossings'
-evidence=0
+assert len(build(fixture,ramp)['floors'])>1 and not build(fixture,ramp)['links'], 'A ramp crossing a slice is not a separate entrance'
 for area in maps:
- entry=dataset['maps'][area['id']];tri=np.fromfile(ROOT/'web/data'/area['mesh'],dtype='<f4').reshape(-1,3,3)
- c=np.cross(tri[:,1]-tri[:,0],tri[:,2]-tri[:,0]);length=np.linalg.norm(c,axis=1)
- road=tri[(length>1e-8)&(c[:,1]>=length*.58)];lo=road[:,:,1].min(axis=1);hi=road[:,:,1].max(axis=1)
+ entry=dataset['maps'][area['id']]
  assert len({l['id'] for l in entry['links']})==len(entry['links'])
  for link in entry['links']:
-  if link['kind']!='road':
-   marker=next(m for m in area['markers'] if m['id']==link['marker']);assert link['p']==marker['p'] and link['to'] is None
-   continue
-  y=link['boundary'];assert link['to']==link['from']+1
-  assert y==entry['floors'][link['from']]['high']==entry['floors'][link['to']]['low']
-  nearby=road[(lo<y-.01)&(hi>y+.01)]
-  point=np.array(link['p']);a=nearby[:,0];u=nearby[:,1]-a;v=nearby[:,2]-a;w=point-a
-  uu=np.einsum('ij,ij->i',u,u);uv=np.einsum('ij,ij->i',u,v);vv=np.einsum('ij,ij->i',v,v)
-  wu=np.einsum('ij,ij->i',w,u);wv=np.einsum('ij,ij->i',w,v);den=uu*vv-uv*uv
-  valid=den>1e-8;s=np.zeros_like(den);t=s.copy();s[valid]=(wu[valid]*vv[valid]-wv[valid]*uv[valid])/den[valid];t[valid]=(wv[valid]*uu[valid]-wu[valid]*uv[valid])/den[valid]
-  residual=np.linalg.norm(w-s[:,None]*u-t[:,None]*v,axis=1)
-  assert np.any(valid&(s>=-.005)&(t>=-.005)&(s+t<=1.005)&(residual<.005)),link
-  evidence+=1
+  assert link['kind']!='road' and link['to'] is None
+  marker=next(m for m in area['markers'] if m['id']==link['marker'])
+  assert link['p']==marker['p']
 
 class Quiet(http.server.SimpleHTTPRequestHandler):
  def log_message(self,*args):pass
@@ -86,13 +73,8 @@ try:
   page.evaluate('()=>{selectMapLayer(6);target.set(-150,-50,10);distance=70;phi=.15;theta=0;}')
   page.locator('#layer-links').click();page.wait_for_timeout(250)
   assert page.locator('#layer-connections').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
-  # Locate an actual crossing and jump to its other layer at the same X/Z.
-  first=page.locator('.layer-link-row:has(.layer-jump)').first
-  linkid=first.get_attribute('data-id');first.locator('button').first.click()
-  start=page.evaluate('({target:target.toArray(),index:layerState.index})')
-  page.locator('#layer-link-jump').click()
-  end=page.evaluate('({target:target.toArray(),index:layerState.index})')
-  assert start['target']==end['target'] and start['index']!=end['index']
+  # Arbitrary slice intersections must no longer claim to be entrances.
+  assert page.locator('.layer-link-marker[data-kind="road"]').count()==0
   page.wait_for_timeout(3000);page.screenshot(path=str(OUT/'layers-compact.png'))
   assert page.evaluate('JSON.stringify(saved.profiles)')==before
   auto_checks=verify_auto_layers(page)
@@ -104,7 +86,7 @@ try:
   index=page.evaluate('layerState.index');page.evaluate('()=>mapCommand("layer-up")');assert page.evaluate('layerState.index')==index
   page.locator('.quest-close').click()
   page.evaluate('()=>{setCompactView(false);english=true;localize();selectMapLayer(6);}')
-  page.locator('.layer-link-row:has(.layer-jump)').first.locator('button').first.click()
+  assert page.locator('.layer-link-marker[data-kind="road"]').count()==0
   page.set_viewport_size({'width':1180,'height':800});page.wait_for_timeout(300)
   page.screenshot(path=str(OUT/'layers-full.png'))
   assert page.locator('#layer-player').inner_text()=='Auto layer'
@@ -113,6 +95,6 @@ try:
   assert not errors,errors
   browser.close()
 finally:server.shutdown()
-report={'maps':len(results),'originalLayers':sum(x['sourceFloorCount'] for x in results),'contentLayers':sum(x['floorCount'] for x in results),'onlyNpcAndItemLayers':'passed','emptyRoadsRemainContinuous':'passed','collectedAndCategoryFiltersPreserved':'passed','roadCrossingsEvidenced':evidence,'eventsWithUnknownDestination':sum(l['to'] is None for a in dataset['maps'].values() for l in a['links']),'fixtures':'passed','boundsAndClipping':'passed','automaticPlayerLayer':auto_checks,'crossingJumpAndProgress':'passed','compactAndFull':'passed','singleDataFetch':True,'errors':errors}
+report={'maps':len(results),'originalLayers':sum(x['sourceFloorCount'] for x in results),'contentLayers':sum(x['floorCount'] for x in results),'onlyNpcAndItemLayers':'passed','emptyRoadsRemainContinuous':'passed','collectedAndCategoryFiltersPreserved':'passed','fakeSliceEntrancesRemoved':True,'eventsWithUnknownDestination':sum(l['to'] is None for a in dataset['maps'].values() for l in a['links']),'fixtures':'passed','boundsAndClipping':'passed','automaticPlayerLayer':auto_checks,'misleadingSliceCrossingsRemoved':'passed','compactAndFull':'passed','singleDataFetch':True,'errors':errors}
 (OUT/'verification.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),'utf-8')
 print(json.dumps(report,ensure_ascii=False),flush=True)

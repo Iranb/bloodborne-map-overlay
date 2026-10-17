@@ -34,11 +34,11 @@ try:
   page.locator('#filters [data-kind="passage"]').click()
   assert page.evaluate('passageLines.geometry.vertices.length')>0
   # Actual-map navigation: test reachable nearby points; disconnected graphs must report failure.
-  route=page.evaluate('''async()=>{navigationWorker();await new Promise(resolve=>{const t=setInterval(()=>{if(navReady){clearInterval(t);resolve();}},50)});return await new Promise(resolve=>{const listener=e=>{if(e.data.type!=='built'){navWorker.removeEventListener('message',listener);resolve(e.data)}};navWorker.addEventListener('message',listener);navWorker.postMessage({type:'route',token:map.id,request:9999,from:live.p,to:live.p.map((v,i)=>v+(i===0?1:0))});});}''')
+  route=page.evaluate('''async()=>{navigationWorker();await new Promise(resolve=>{const t=setInterval(()=>{if(navReady){clearInterval(t);resolve();}},50)});return await new Promise(resolve=>{const listener=e=>{if(e.data.type==='route'||e.data.type==='error'){navWorker.removeEventListener('message',listener);resolve(e.data)}};navWorker.addEventListener('message',listener);navWorker.postMessage({type:'route',token:map.id,request:9999,from:live.p,to:live.p.map((v,i)=>v+(i===0?1:0))});});}''')
   assert route['type']=='route',route
   assert route['points']
   # Worker fixtures: connected floor works, separated floor does not receive a fabricated edge.
-  fixture=page.evaluate('''async()=>{const w=new Worker('route-worker.js');let result=[];await new Promise(r=>{w.onmessage=e=>r(e.data);const a=new Float32Array([0,0,0,4,0,0,0,0,4, 4,0,0,4,0,4,0,0,4, 30,0,0,34,0,0,30,0,4]);w.postMessage({type:'build',token:'test',positions:a.buffer},[a.buffer]);});for(const to of [[4,0,4],[30,0,0]])result.push(await new Promise(r=>{w.onmessage=e=>r(e.data);w.postMessage({type:'route',token:'test',request:1,from:[0,0,0],to});}));w.terminate();return result;}''')
+  fixture=page.evaluate('''async()=>{const w=new Worker('route-worker.js');let result=[];await new Promise(r=>{w.onmessage=e=>r(e.data);const a=new Float32Array([0,0,0,0,0,4,4,0,0, 4,0,0,0,0,4,4,0,4, 30,0,0,30,0,4,34,0,0]);w.postMessage({type:'build',token:'test',positions:a.buffer},[a.buffer]);});for(const to of [[4,0,4],[30,0,0]])result.push(await new Promise(r=>{w.onmessage=e=>r(e.data);w.postMessage({type:'route',token:'test',request:1,from:[0,0,0],to});}));w.terminate();return result;}''')
   assert fixture[0]['type']=='route' and fixture[1]['type']=='error'
   page.locator('#language').click()
   assert page.locator('#help-button').inner_text()=='Help'
